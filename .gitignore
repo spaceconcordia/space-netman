@@ -1,0 +1,5 @@
+*.swp
+*.pyc
+a.out
+*.exe
+*.x
