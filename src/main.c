@@ -22,7 +22,7 @@ int main()
 
 void loop_until_session_established(netman_t * netman){
 
-   of2g_frame_t frame
+   of2g_frame_t frame;
 
    while(1){
 
@@ -40,10 +40,11 @@ void loop_until_session_established(netman_t * netman){
 
 void loop_until_session_closed(netman_t * netman){
 
-   uint8_t buffer[256]; // TODO - exact max size
+   unsigned char buffer[256]; // TODO - exact max size
 
-   timer_t window_timer;
-   timer_t resend_timer;
+   // create 2 timers
+   timer_t window_timer = timer_get();
+   timer_t resend_timer = timer_get();
 
    // We continue in the loop as long as the window is open
    while( ! timer_complete(&window_timer) ){
@@ -67,14 +68,14 @@ void loop_until_session_closed(netman_t * netman){
             he_write(netman->current_tx_data); 
             // We also restart our timer so that we know how long
             // we've been waiting.
-            timer_start(&resend_timer);
+            timer_start(&resend_timer, RESEND_TIMEOUT);
          }
       }
 
       // If there is new data incoming...
       if(he_read(&frame)){
          // ... we process it.
-         netman_new_rx_frame(netman, &frame)
+         netman_new_rx_frame(netman, &frame);
 
          // Then, depending on what we received, we take some
          // action.
@@ -82,7 +83,7 @@ void loop_until_session_closed(netman_t * netman){
             case NEW_ACK:
                // We don't need to do anything other than keep
                // the window open.
-               timer_start(&window_timer);
+               timer_start(&window_timer, RESEND_TIMEOUT);
                break;
             case NEW_DATA:
                // We need to acknowledge that we received the data
@@ -90,7 +91,7 @@ void loop_until_session_closed(netman_t * netman){
                // we need to make sure the window stays open.
                he_write(netman->current_tx_ack); 
                write_commander_pipe(); // TODO
-               timer_start(&window_timer);
+               timer_start(&window_timer, WINDOW_TIMEOUT);
                break;
             case DUP_DATA:
                // Duplicate DATA? They must not have got our ACK, lets

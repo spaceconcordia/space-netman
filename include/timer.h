@@ -16,7 +16,7 @@ timer_t timer_get();
 // The timer will expire at the given timeout value
 // Entering a timeout of 0 will disarm the timer
 // The function resets the time when it is called to the timeout value
-void timer_start(timer_t * timerid, uint32_t timeout);
+void timer_start(timer_t * timerid, time_t timeout);
 
 // Returns true if the timer has expired
 bool timer_complete(timer_t * timer);

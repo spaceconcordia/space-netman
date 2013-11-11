@@ -27,7 +27,7 @@ timer_t timer_get()
 
 }
 
-void timer_start(timer_t * timer, uint32_t timeout)
+void timer_start(timer_t * timer, time_t timeout)
 {
 	printf("timer starting\n");
     struct itimerspec it_val;
