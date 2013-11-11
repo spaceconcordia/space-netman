@@ -2,19 +2,20 @@
 #define OF2G_H_
 
 #include <inttypes.h>
-#include <bool.h>
-
+#include <stdbool.h>
 
 // Need to confirm what the actual max size for an OF2G frame is
 // it should be less than 256 bytes though, since the He frames are
 // max 256 bytes including their metadata (from what I remember anyway)
 #define OF2G_BUFFER_SIZE 256
-typedef uint8_t of2g_frame_t[OF2G_BUFFER_SIZE];
+typedef unsigned char of2g_frame_t[OF2G_BUFFER_SIZE];
 
 // There's only two types of frames, DATA and ACK
 typedef enum {
-   OF2G_DATA;
-   OF2G_ACK;
+
+   OF2G_ACK,
+   OF2G_DATA
+
 } of2g_frametype_t;
 
 
@@ -37,10 +38,10 @@ bool of2g_valid_frame(of2g_frame_t * frame);
 of2g_frametype_t of2g_get_frametype(of2g_frame_t * frame);
 
 // This function should return the value of the fid field of `frame`
-uint8_t of2g_get_fid(of2g_frame_t * frame);
+unsigned char of2g_get_fid(of2g_frame_t * frame);
 
 // This function should return the value of the ack id field of `frame`
-uint8_t of2g_get_ackid(of2g_frame_t * frame);
+unsigned char of2g_get_ackid(of2g_frame_t * frame);
 
 // This function should extract the raw data from `frame` and store it in
 // `out`. It is assumed that `frame` is a valid OF2G data frame, and that `out`
@@ -56,11 +57,11 @@ uint8_t of2g_get_data_content(of2g_frame_t * frame, uint8_t * out);
 //
 // This function should return true if the frame is built successfully, and
 // should return false if the frame can't be built for any reason.
-bool of2g_build_data_frame(uint8_t * buffer, uint8_t length, uint8_t fid, of2g_frame_t * out);
+bool of2g_build_data_frame(unsigned char * buffer, uint8_t length, unsigned char fid, of2g_frame_t * out);
 
 // This function should create an OF2G ack frame to be used as a response for
 // `data_frame`, storing it in `out`. It should return true as long as the frame
-// was built successfully, and false otherwise.
+// was built successfully, and falsse otherwise.
 bool of2g_build_ack_frame(of2g_frame_t * data_frame, of2g_frame_t * out);
 
 

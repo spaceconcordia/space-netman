@@ -9,25 +9,25 @@
 
 
 #include <inttypes.h>
-
+#include <string.h>
 #include "of2g.h"
 
 // This enum describes the most recently received frame
 typedef enum {
-   NEW_ACK;
-   NEW_DATA;
-   DUP_DATA;
-   BAD_CSUM;
-   BAD_FID;
-} netman_rx_state_t
+   NEW_ACK,
+   NEW_DATA,
+   DUP_DATA,
+   BAD_CSUM,
+   BAD_FID
+} netman_rx_state_t;
 
 // this enum describes the status of the most recently sent
 // DATA frame. (N.B., we don't care about our sent ACKs really.
 // If we don't hear anything back we assume they are received.
 // If they're not received, we will be notified).
 typedef enum {
-   WAITING_FOR_ACK;
-   NOT_WAITING_FOR_ACK;
+   WAITING_FOR_ACK,
+   NOT_WAITING_FOR_ACK
 } netman_tx_state_t;
 
 typedef struct {
@@ -35,7 +35,7 @@ typedef struct {
    // These members both refer to the last sent DATA. `current_tx_data`
    // is the data frame itself, `current_tx_fid` is the frame id of
    // `current_tx_data`.
-   uint8_t      current_tx_fid;
+   unsigned char current_tx_fid;
    of2g_frame_t current_tx_data;
 
    // This member holds the last transmitted ACK. This frame is always the
@@ -45,7 +45,7 @@ typedef struct {
    // These members both refer to the last received DATA. `current_rx_fid` is
    // the frame id of `current_rx_data`, which is the most recently received
    // valid data.
-   uint8_t      current_rx_fid;
+   unsigned char      current_rx_fid;
    of2g_frame_t current_rx_data;
 
    // This member holds the last received valid ACK. This frame should be a
@@ -65,7 +65,7 @@ void netman_init(netman_t * netman);
 
 // Build an of2g DATA frame based on the given buffer of raw data, and
 // store it in netman->current_tx_data
-void netman_new_tx_bytes(netman_t * netman, uint8_t * buffer, uint8_t length);
+void netman_new_tx_bytes(netman_t * netman, unsigned char * buffer, uint8_t length);
 
 // Build an of2g ACK frame based on the given data frame
 void build_ack_frame (netman_t * netman, of2g_frame_t * data_frame);
