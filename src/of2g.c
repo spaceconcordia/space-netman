@@ -11,7 +11,7 @@ bool of2g_valid_frame(of2g_frame_t * frame)
 {
 	// TODO: what do we need to know about FID and ACK for it to be valid?
 
-	uint8_t length = *(frame[2]); // frames bytes are char, does this cause issues?
+	size_t length = *(frame[2]); // frames bytes are char, does this cause issues?
 
 	// verify checksum
 	HE100_checksum frame_checksum = HE100_fletcher16((char*)*frame, length+3);
@@ -74,7 +74,7 @@ uint8_t of2g_get_data_content(of2g_frame_t * frame, unsigned char * out)
 {
 
 	// data length - FID, ack, length, 2 bytes for chksum
-	uint8_t length = *(frame[3]) - 5;
+	size_t length = *(frame[3]) - 5;
 
 	int i;
 	for(i=3 ;i < length ;++i)
@@ -92,7 +92,7 @@ uint8_t of2g_get_data_content(of2g_frame_t * frame, unsigned char * out)
 //
 // This function should return true if the frame is built successfully, and
 // should return false if the frame can't be built for any reason.
-bool of2g_build_data_frame(unsigned char * buffer, uint8_t length, unsigned char fid, of2g_frame_t * out)
+bool of2g_build_data_frame(unsigned char * buffer, size_t length, unsigned char fid, of2g_frame_t * out)
 {
 	// length -> size_t
 	// wrap "length" bytes of buffer in of2g data frame
