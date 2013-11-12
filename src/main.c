@@ -1,8 +1,18 @@
 #include <stdio.h>
 #include <assert.h>
+#include <time.h>
+#include "timer.h"
+#include "he.h"
+#include "netman.h"
+
+#define WINDOW_TIMEOUT 300 // TODO: confirm timeout values
+#define RESEND_TIMEOUT 40
 
 void loop_until_session_closed();
 void loop_until_session_established();
+void init_session();
+void write_commander_pipe();
+bool read_commander_output(unsigned char * buffer);
 
 int main()
 {
@@ -54,7 +64,7 @@ void loop_until_session_closed(netman_t * netman){
          // ...and we've been waiting for a while...
          if( timer_complete(&resend_timer) ){
             // ...then we're impatient and we resend our data.
-            he_write(netman->current_tx_data);
+            he_write(&(netman->current_tx_data));
          }
       }else{
          // Otherwise, logic tells us we most not be waiting for
@@ -64,18 +74,20 @@ void loop_until_session_closed(netman_t * netman){
          // If we have any new data to send...
          if( read_commander_output(buffer) ){         // TODO
             // ... then we send it!
-            netman_new_tx_bytes(netman, buffer, length);
-            he_write(netman->current_tx_data); 
+            netman_new_tx_bytes(netman, buffer, 256); // TODO: verify length that is passed
+            he_write(&(netman->current_tx_data));
             // We also restart our timer so that we know how long
             // we've been waiting.
             timer_start(&resend_timer, RESEND_TIMEOUT);
          }
       }
 
+      of2g_frame_t frame;
+
       // If there is new data incoming...
       if(he_read(&frame)){
          // ... we process it.
-         netman_new_rx_frame(netman, &frame);
+         netman_rx_frame(netman, &frame);
 
          // Then, depending on what we received, we take some
          // action.
@@ -89,14 +101,14 @@ void loop_until_session_closed(netman_t * netman){
                // We need to acknowledge that we received the data
                // ok, send the data to the commander, and finally
                // we need to make sure the window stays open.
-               he_write(netman->current_tx_ack); 
+               he_write(&(netman->current_tx_ack));
                write_commander_pipe(); // TODO
                timer_start(&window_timer, WINDOW_TIMEOUT);
                break;
             case DUP_DATA:
                // Duplicate DATA? They must not have got our ACK, lets
                // send it again.
-               he_write(netman->current_tx_ack); 
+               he_write(&(netman->current_tx_ack));
                // TODO - does this keep the window open??
                break;
             case BAD_FID:
@@ -108,3 +120,5 @@ void loop_until_session_closed(netman_t * netman){
       }
    }
 }
+
+
