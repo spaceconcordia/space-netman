@@ -3,3 +3,7 @@
 a.out
 *.exe
 *.x
+*.o
+.deps
+lib
+bin
