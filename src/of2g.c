@@ -64,6 +64,12 @@ unsigned char of2g_get_ackid(of2g_frame_t * frame)
 	return *(frame[1]);
 }
 
+// Returns length field of 'frame'
+size_t of2g_get_length(of2g_frame_t * frame)
+{
+	return *(frame[2]);
+}
+
 // This function should extract the raw data from `frame` and store it in
 // `out`. It is assumed that `frame` is a valid OF2G data frame, and that `out`
 // is large enough to store the maximum possible amount of data that an
