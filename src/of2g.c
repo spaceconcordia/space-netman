@@ -12,7 +12,7 @@ bool of2g_valid_frame(of2g_frame_t frame)
 {
 	// TODO: what do we need to know about FID and ACK for it to be valid?
 
-	uint8_t length = OF2G_FRAME_2_BUFFER(frame)[2]; // frames bytes are char, does this cause issues?
+	size_t length = OF2G_FRAME_2_BUFFER(frame)[2]; // frames bytes are char, does this cause issues?
 
 	// verify checksum
 	HE100_checksum frame_checksum = HE100_fletcher16((char*)OF2G_FRAME_2_BUFFER(frame), length+3);
@@ -66,6 +66,12 @@ unsigned char of2g_get_ackid(of2g_frame_t frame)
 	return OF2G_FRAME_2_BUFFER(frame)[1];
 }
 
+// Returns length field of 'frame'
+size_t of2g_get_length(of2g_frame_t * frame)
+{
+	return *(frame[2]);
+}
+
 // This function should extract the raw data from `frame` and store it in
 // `out`. It is assumed that `frame` is a valid OF2G data frame, and that `out`
 // is large enough to store the maximum possible amount of data that an
@@ -76,9 +82,9 @@ uint8_t of2g_get_data_content(of2g_frame_t frame, unsigned char * out)
 {
 
 	// data length - FID, ack, length, 2 bytes for chksum
-	uint8_t length = OF2G_FRAME_2_BUFFER(frame)[3] - 5;
+	size_t length = OF2G_FRAME_2_BUFFER(frame)[3] - 5;
 
-	int i;
+	size_t i;
 	for(i=3 ;i < length ;++i)
 	{
 		out[i] = OF2G_FRAME_2_BUFFER(frame)[i+3];
@@ -94,11 +100,11 @@ uint8_t of2g_get_data_content(of2g_frame_t frame, unsigned char * out)
 //
 // This function should return true if the frame is built successfully, and
 // should return false if the frame can't be built for any reason.
-bool of2g_build_data_frame(unsigned char * buffer, uint8_t length, unsigned char fid, of2g_frame_t out)
+bool of2g_build_data_frame(unsigned char * buffer, size_t length, unsigned char fid, of2g_frame_t out)
 {
 	// length -> size_t
 	// wrap "length" bytes of buffer in of2g data frame
-	int i;
+	size_t i;
 	for(i = 0;i < length; ++i)
 	{
 		OF2G_FRAME_2_BUFFER(out)[i] = buffer[i];

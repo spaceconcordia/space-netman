@@ -23,7 +23,7 @@ void netman_init(netman_t * netman)
 
 // Build an of2g DATA frame based on the given buffer of raw data, and
 // store it in netman->current_tx_data
-void netman_new_tx_bytes(netman_t * netman, unsigned char * buffer, uint8_t length)
+void netman_new_tx_bytes(netman_t * netman, unsigned char * buffer, size_t length)
 {
 	char fid = netman->current_tx_fid;
 	of2g_build_data_frame(buffer, length, fid, netman->current_tx_data);

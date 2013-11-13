@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <assert.h>
+#include <time.h>
 
+#include <timer.h>
 #include <Net2Com.h>
 
 #include "../include/netman.h"
-#include "../include/timer.h"
 #include "../include/transceiver.h"
 
 void loop_until_session_closed(netman_t *, Net2Com * net2com);
@@ -64,6 +65,7 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
    timer_t window_timer = timer_get();
    timer_t resend_timer = timer_get();
 
+   // values in milliseconds
    const uint32_t RESEND_TIMEOUT =      10 * 1000;
    const uint32_t WINDOW_TIMEOUT = 15 * 60 * 1000;
 
@@ -130,3 +132,5 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
       }
    }
 }
+
+

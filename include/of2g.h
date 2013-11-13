@@ -2,8 +2,8 @@
 #define OF2G_H_
 
 #include <inttypes.h>
-#include <stdlib.h>
-
+#include <stdbool.h>
+#include <stddef.h>
 // Need to confirm what the actual max size for an OF2G frame is
 // it should be less than 256 bytes though, since the He frames are
 // max 256 bytes including their metadata (from what I remember anyway)
@@ -43,6 +43,9 @@ unsigned char of2g_get_fid(of2g_frame_t frame);
 // This function should return the value of the ack id field of `frame`
 unsigned char of2g_get_ackid(of2g_frame_t frame);
 
+// This function should return the value of the length field of 'frame'
+size_t of2g_get_length(of2g_frame_t * frame);
+
 // This function should extract the raw data from `frame` and store it in
 // `out`. It is assumed that `frame` is a valid OF2G data frame, and that `out`
 // is large enough to store the maximum possible amount of data that an
@@ -57,7 +60,7 @@ uint8_t of2g_get_data_content(of2g_frame_t frame, uint8_t * out);
 //
 // This function should return true if the frame is built successfully, and
 // should return false if the frame can't be built for any reason.
-bool of2g_build_data_frame(unsigned char * buffer, uint8_t length, unsigned char fid, of2g_frame_t out);
+bool of2g_build_data_frame(unsigned char * buffer, size_t length, unsigned char fid, of2g_frame_t out);
 
 // This function should create an OF2G ack frame to be used as a response for
 // `data_frame`, storing it in `out`. It should return true as long as the frame
