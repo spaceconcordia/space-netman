@@ -1,5 +1,5 @@
-#ifndef HE_H_
-#define HE_H_
+#ifndef TRANSCEIVER_H_
+#define TRANSCEIVER_H_
 
 #include <stdbool.h>
 
@@ -11,11 +11,11 @@
 //
 // should return true and write data into `frame` if new data was read,
 // otherwise should return false.
-bool he_read(of2g_frame_t * frame);
+bool transceiver_read(of2g_frame_t frame);
 
 // Send a frame over the He. This function can (should?) block while the frame is
 // being sent.
 //
-void he_write(of2g_frame_t * frame);
+void transceiver_write(of2g_frame_t frame);
 
 #endif

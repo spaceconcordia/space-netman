@@ -1,3 +1,6 @@
+#ifndef TIMER_H_
+#define TIMER_H_
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <inttypes.h>
@@ -20,3 +23,5 @@ void timer_start(timer_t * timerid, time_t timeout);
 
 // Returns true if the timer has expired
 bool timer_complete(timer_t * timer);
+
+#endif

@@ -1,3 +1,6 @@
+#include "../include/timer.h"
+
+
 timer_t timer_get()
 {
 	timer_t timer;
@@ -15,8 +18,6 @@ timer_t timer_get()
 
 	// create timer
     sev.sigev_notify = SIGEV_NONE;
-    sev.sigev_signo = SIGCONT;
-    sev.sigev_value.sival_ptr = &timer;
 
 	 if (timer_create(CLOCK_MONOTONIC, &sev, &timer) == -1) {
 		perror("Could not create timer\n");

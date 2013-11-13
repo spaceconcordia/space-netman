@@ -73,7 +73,7 @@ void build_ack_frame (netman_t * netman, of2g_frame_t * data_frame);
 
 // This function should handle the received `frame`, changing the state 
 // of `netman` and updating `current_*x_*` members appropriately
-void netman_rx_frame(netman_t * netman, of2g_frame_t * frame);
+void netman_rx_frame(netman_t * netman, of2g_frame_t frame);
 
 
 #endif

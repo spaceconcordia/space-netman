@@ -1,4 +1,5 @@
-#include "netman.h"
+#include "../include/netman.h"
+#include <string.h>
 
 
 // Should perform any and all necessary initialization of netman
@@ -9,8 +10,8 @@ void netman_init(netman_t * netman)
 	netman->current_rx_ack = 0;
 	netman->current_rx_data = 0;
 	netman->current_rx_fid = 0;
-	netman->current_tx_ack = 0;
-	netman->current_tx_data = 0;
+	//G netman->current_tx_ack = 0;
+	//G netman->current_tx_data = 0;
 	netman->current_tx_fid = 0;
 	// assuming ground station communicates first
 	netman->rx_state = 0;
@@ -24,27 +25,23 @@ void netman_init(netman_t * netman)
 // store it in netman->current_tx_data
 void netman_new_tx_bytes(netman_t * netman, unsigned char * buffer, uint8_t length)
 {
-	of2g_frame_t * out = 0;
 	char fid = netman->current_tx_fid;
-	of2g_build_data_frame(buffer, length, fid, out);
-	memcpy(&(netman->current_tx_data), out, sizeof netman);
+	of2g_build_data_frame(buffer, length, fid, netman->current_tx_data);
 	netman->tx_state = WAITING_FOR_ACK;
 
 }
 
 // Build an of2g ACK frame based on the given data frame
-void build_ack_frame (netman_t * netman, of2g_frame_t * data_frame)
+void build_ack_frame (netman_t * netman, of2g_frame_t data_frame)
 {
 	// TODO: check if ack frame contains data (between length and checksum
-	of2g_frame_t * out = 0;
-	of2g_build_ack_frame(data_frame, out);
-	netman->current_tx_fid = of2g_get_fid(out);
-	memcpy(&(netman->current_tx_ack), out, sizeof netman);
+	of2g_build_ack_frame(data_frame, netman->current_tx_ack);
+	netman->current_tx_fid = of2g_get_ackid(data_frame);
 }
 
 // This function should handle the received `frame`, changing the state
 // of `netman` and updating `current_*x_*` members appropriately
-void netman_rx_frame(netman_t * netman, of2g_frame_t * frame)
+void netman_rx_frame(netman_t * netman, of2g_frame_t frame)
 {
 	// TODO: verify conditions for each state
 
@@ -68,7 +65,7 @@ void netman_rx_frame(netman_t * netman, of2g_frame_t * frame)
 		if(netman->current_tx_fid == of2g_get_ackid(frame)) //
 		{
 			netman->rx_state = NEW_ACK;
-			memcpy(&(netman->current_rx_ack), frame, sizeof netman);
+         memcpy(&netman->current_rx_ack, frame, sizeof(of2g_frame_t));
 			// update FID
 			++netman->current_rx_fid;
 		}
@@ -77,7 +74,7 @@ void netman_rx_frame(netman_t * netman, of2g_frame_t * frame)
 		if(netman->tx_state == NOT_WAITING_FOR_ACK) { // not waiting for ack, ignore fid for now
 			netman->rx_state = NEW_DATA;
 			netman->current_rx_fid = of2g_get_fid(frame);
-			memcpy(&(netman->current_rx_data), frame, sizeof netman);
+         memcpy(&netman->current_rx_data, frame, sizeof(of2g_frame_t));
 		}
 		else {
 			netman->rx_state = DUP_DATA;
