@@ -1,3 +1,6 @@
+// Using GoogleTests
+#include "../../include/of2g.h"
+
 class Netman_of2g_Test : public ::testing::Test {
   protected:
   virtual void SetUp() {
