@@ -1,4 +1,5 @@
 // Using GoogleTests
+#include "gtest/gtest.h"
 #include "../../include/of2g.h"
 
 class Netman_of2g_Test : public ::testing::Test {
@@ -8,8 +9,8 @@ class Netman_of2g_Test : public ::testing::Test {
     valid_ackframe = { };
     unsigned char buffer[256] = { };
   }
-  of2g_frame valid_dataframe;
-  of2g_frame valid_ackframe;
+  of2g_frame_t valid_dataframe;
+  of2g_frame_t valid_ackframe;
   
 };
 
