@@ -1,5 +1,4 @@
-#include <SC_he100.h>
-
+#include "he100.h"
 #include "../include/of2g.h"
 
 // This function should inspect the given of2g frame and return
@@ -23,6 +22,8 @@ bool of2g_valid_frame(of2g_frame_t frame)
 	}
 	else
 	{
+		printf("sum1 0x%x is not 0x%x\n", frame_checksum.sum1,OF2G_FRAME_2_BUFFER(frame)[length+3]);
+		printf("sum2 0x%x is not 0x%x\n", frame_checksum.sum2,OF2G_FRAME_2_BUFFER(frame)[length+3+1]);
 		return false;
 	}
 
@@ -40,11 +41,11 @@ of2g_frametype_t of2g_get_frametype(of2g_frame_t frame)
 	unsigned char fid   = of2g_get_fid(frame);
 	unsigned char ackid = of2g_get_ackid(frame);
 
-	if(ackid == '0') {
+	if(ackid == 0) {
 		return OF2G_ACK;
 	}
 
-	if (fid == ackid) {
+	else if (fid == ackid) {
 		return OF2G_ACK;
 	}
 	else {
@@ -67,9 +68,9 @@ unsigned char of2g_get_ackid(of2g_frame_t frame)
 }
 
 // Returns length field of 'frame'
-size_t of2g_get_length(of2g_frame_t * frame)
+size_t of2g_get_length(of2g_frame_t frame)
 {
-	return *(frame[2]);
+	return OF2G_FRAME_2_BUFFER(frame)[2];
 }
 
 // This function should extract the raw data from `frame` and store it in
@@ -82,12 +83,12 @@ uint8_t of2g_get_data_content(of2g_frame_t frame, unsigned char * out)
 {
 
 	// data length - FID, ack, length, 2 bytes for chksum
-	size_t length = OF2G_FRAME_2_BUFFER(frame)[3] - 5;
+	size_t length = OF2G_FRAME_2_BUFFER(frame)[2];
 
 	size_t i;
-	for(i=3 ;i < length ;++i)
+	for(i=0 ;i < length ;++i)
 	{
-		out[i] = OF2G_FRAME_2_BUFFER(frame)[i+3];
+		out[i+3] = OF2G_FRAME_2_BUFFER(frame)[i+3];
 	}
 
 	return length;
@@ -102,23 +103,24 @@ uint8_t of2g_get_data_content(of2g_frame_t frame, unsigned char * out)
 // should return false if the frame can't be built for any reason.
 bool of2g_build_data_frame(unsigned char * buffer, size_t length, unsigned char fid, of2g_frame_t out)
 {
-	// length -> size_t
 	// wrap "length" bytes of buffer in of2g data frame
 	size_t i;
 	for(i = 0;i < length; ++i)
 	{
-		OF2G_FRAME_2_BUFFER(out)[i] = buffer[i];
-	}
+		printf("0x%x ", buffer[i]);
+		OF2G_FRAME_2_BUFFER(out)[i+3] = buffer[i];
 
+	}
+	printf("\n");
 	// place FID, ACK, Length
 	OF2G_FRAME_2_BUFFER(out)[0] = fid;
-	OF2G_FRAME_2_BUFFER(out)[2] = length + 5;
+	OF2G_FRAME_2_BUFFER(out)[2] = length;
 	// TODO: ACK
-
+	OF2G_FRAME_2_BUFFER(out)[1] = 0x70;
 	// place checksum
-	HE100_checksum frame_checksum = HE100_fletcher16((char *)OF2G_FRAME_2_BUFFER(out), length+3);	// TODO: fix checksum for int
+	HE100_checksum frame_checksum = HE100_fletcher16((char *)OF2G_FRAME_2_BUFFER(out), length+3);
 
-	OF2G_FRAME_2_BUFFER(out)[length+3]   = frame_checksum.sum1;
+	OF2G_FRAME_2_BUFFER(out)[3+length]   = frame_checksum.sum1;
 	OF2G_FRAME_2_BUFFER(out)[3+length+1] = frame_checksum.sum2;
 	return true;
 
@@ -138,7 +140,7 @@ bool of2g_build_ack_frame(of2g_frame_t data_frame, of2g_frame_t out)
 	OF2G_FRAME_2_BUFFER(out)[0] = of2g_get_fid(data_frame);
 	OF2G_FRAME_2_BUFFER(out)[1] = of2g_get_ackid(data_frame);
 
-	OF2G_FRAME_2_BUFFER(out)[2] = 5; // length of ACK is 5 assuming no data
+	OF2G_FRAME_2_BUFFER(out)[2] = 5; // assuming ACK has no data, is this value 0?
 
 	// place checksum
 	HE100_checksum frame_checksum = HE100_fletcher16((char*)OF2G_FRAME_2_BUFFER(out), 3);
@@ -156,9 +158,6 @@ bool of2g_build_ack_frame(of2g_frame_t data_frame, of2g_frame_t out)
 }
 
 size_t of2g_get_frame_length(of2g_frame_t frame){
-   // TODO - hack to avoid unused parameter!!!!
-   frame = frame + 1;
-   frame = frame -1;
-   // TODO - implement this
-   return OF2G_BUFFER_SIZE;
+   size_t length = frame[2] + 5;
+   return length;
 }

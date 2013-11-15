@@ -1,3 +1,4 @@
+/*
 #include <stdio.h>
 #include <assert.h>
 #include <time.h>
@@ -133,4 +134,34 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
    }
 }
 
+*/
+
+#include <stdio.h>
+#include "of2g.h"
+#include "stdbool.h"
+#include "he100.h"
+int main() {
+
+	unsigned char test[] = { 0x73, 0x70, 0x09, 0x6f, 0x6c, 0x69, 0x76, 0x69, 0x65, 0x72, 0x73, 0x63, 0xbc, 0xb8};
+	unsigned char buffer[] = {0x6f, 0x6c, 0x69, 0x76, 0x69, 0x65, 0x72, 0x73, 0x63};
+//	HE100_checksum checksum = HE100_fletcher16(test2, 12);
+//	printf("sum1 = 0x%x, sum2 = 0x%x\n", checksum.sum1, checksum.sum2);
+	printf("%s\n", test);
+//	bool flag = of2g_valid_frame(test);
+//	printf("%d", flag);
+//	unsigned char fid = of2g_get_frame_length(test);
+//	printf("0x%d\n", fid);
+
+	  size_t length = 0x09;
+	  unsigned char fid = 0x73;
+	  of2g_frame_t out;
+	  of2g_build_data_frame(buffer,length,fid,out);
+
+	  int i =0;
+	  for(i=0;i<14;++i)
+		  printf("0x%x ", out[i]);
+
+	return 0;
+
+}
 

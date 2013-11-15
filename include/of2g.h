@@ -44,7 +44,7 @@ unsigned char of2g_get_fid(of2g_frame_t frame);
 unsigned char of2g_get_ackid(of2g_frame_t frame);
 
 // This function should return the value of the length field of 'frame'
-size_t of2g_get_length(of2g_frame_t * frame);
+size_t of2g_get_length(of2g_frame_t frame);
 
 // This function should extract the raw data from `frame` and store it in
 // `out`. It is assumed that `frame` is a valid OF2G data frame, and that `out`

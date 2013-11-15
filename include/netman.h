@@ -68,7 +68,7 @@ void netman_init(netman_t * netman);
 void netman_new_tx_bytes(netman_t * netman, unsigned char * buffer, size_t length);
 
 // Build an of2g ACK frame based on the given data frame
-void build_ack_frame (netman_t * netman, of2g_frame_t * data_frame);
+void build_ack_frame (netman_t * netman, of2g_frame_t data_frame);
 
 
 // This function should handle the received `frame`, changing the state 
