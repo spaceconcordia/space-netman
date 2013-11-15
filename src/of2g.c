@@ -116,7 +116,7 @@ bool of2g_build_data_frame(unsigned char * buffer, size_t length, unsigned char 
 	OF2G_FRAME_2_BUFFER(out)[0] = fid;
 	OF2G_FRAME_2_BUFFER(out)[2] = length;
 	// TODO: ACK
-	OF2G_FRAME_2_BUFFER(out)[1] = 0x70;
+	OF2G_FRAME_2_BUFFER(out)[1] = 0x0;
 	// place checksum
 	HE100_checksum frame_checksum = HE100_fletcher16((char *)OF2G_FRAME_2_BUFFER(out), length+3);
 

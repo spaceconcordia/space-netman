@@ -71,6 +71,4 @@ bool of2g_build_ack_frame(of2g_frame_t data_frame, of2g_frame_t out);
 // Should return the length, in bytes, of `frame`, INCLUDING header fields and checksum bytes.
 size_t of2g_get_frame_length(of2g_frame_t frame);
 
-
-
 #endif

@@ -17,8 +17,6 @@ void netman_init(netman_t * netman)
 	netman->rx_state = 0;
 	*/
 	netman->tx_state = NOT_WAITING_FOR_ACK;
-
-
 }
 
 // Build an of2g DATA frame based on the given buffer of raw data, and

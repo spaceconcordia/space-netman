@@ -7,7 +7,6 @@
 // and received frames. It has no conception of either IO or timing
 // simply shovelling frames around.
 
-
 #include <inttypes.h>
 #include <string.h>
 #include "of2g.h"
