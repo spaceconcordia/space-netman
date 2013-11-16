@@ -1,4 +1,4 @@
-#include "he100.h"
+#include "../include/he100.h"
 #include "../include/of2g.h"
 
 // This function should inspect the given of2g frame and return
@@ -20,13 +20,13 @@ bool of2g_valid_frame(of2g_frame_t frame)
 	{
 		return true;
 	}
-	else
+	else // log if got bad frame
 	{
 		printf("sum1 0x%x is not 0x%x\n", frame_checksum.sum1,OF2G_FRAME_2_BUFFER(frame)[length+3]);
 		printf("sum2 0x%x is not 0x%x\n", frame_checksum.sum2,OF2G_FRAME_2_BUFFER(frame)[length+3+1]);
 		return false;
 	}
-
+	
 }
 
 // This function should inspect the given of2g frame and return its
@@ -109,7 +109,6 @@ bool of2g_build_data_frame(unsigned char * buffer, size_t length, unsigned char 
 	{
 		printf("0x%x ", buffer[i]);
 		OF2G_FRAME_2_BUFFER(out)[i+3] = buffer[i];
-
 	}
 	printf("\n");
 	// place FID, ACK, Length
@@ -122,9 +121,12 @@ bool of2g_build_data_frame(unsigned char * buffer, size_t length, unsigned char 
 
 	OF2G_FRAME_2_BUFFER(out)[3+length]   = frame_checksum.sum1;
 	OF2G_FRAME_2_BUFFER(out)[3+length+1] = frame_checksum.sum2;
-	return true;
-
-	// TODO: verify for false condition
+	
+	if(of2g_valid_frame(out))
+		return true;
+	else
+		return false;
+	
 }
 
 // This function should create an OF2G ack frame to be used as a response for
@@ -147,13 +149,15 @@ bool of2g_build_ack_frame(of2g_frame_t data_frame, of2g_frame_t out)
 
 	OF2G_FRAME_2_BUFFER(out)[3] = frame_checksum.sum1;
 	OF2G_FRAME_2_BUFFER(out)[4] = frame_checksum.sum2;
-
-	return true;
-
-	// TODO: verify for false condition, Log if fails
+	
+	if(of2g_valid_frame(out))
+		return true;
+	else
+		return false;
+	
 	/*
 	Log(FILE* lf, Priority ePriority, string process, string msg);
-	get_filename(string folder, string prefix, string suffix);
+	
 	*/
 }
 
