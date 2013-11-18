@@ -52,7 +52,7 @@ size_t of2g_get_length(of2g_frame_t frame);
 // OF2G data frame can hold.
 //
 // This function should return the number of bytes stored into `out`
-uint8_t of2g_get_data_content(of2g_frame_t frame, uint8_t * out);
+size_t of2g_get_data_content(of2g_frame_t frame, unsigned char * out);
 
 // This function should wrap the first `length` bytes of `buffer` in an
 // OF2G data frame, which is stored in `out`. The result in `out` should

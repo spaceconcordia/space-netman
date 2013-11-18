@@ -42,14 +42,10 @@ of2g_frametype_t of2g_get_frametype(of2g_frame_t frame)
 	unsigned char ackid = of2g_get_ackid(frame);
 
 	if(ackid == 0) {
-		return OF2G_ACK;
-	}
-
-	else if (fid == ackid) {
-		return OF2G_ACK;
+		return OF2G_DATA;
 	}
 	else {
-		return OF2G_DATA;
+		return OF2G_ACK;
 	}
 
 }
@@ -79,16 +75,17 @@ size_t of2g_get_length(of2g_frame_t frame)
 // OF2G data frame can hold.
 //
 // This function should return the number of bytes stored into `out`
-uint8_t of2g_get_data_content(of2g_frame_t frame, unsigned char * out)
+size_t of2g_get_data_content(of2g_frame_t frame, unsigned char * out)
 {
 
 	// data length - FID, ack, length, 2 bytes for chksum
 	size_t length = OF2G_FRAME_2_BUFFER(frame)[2];
-
+	
 	size_t i;
 	for(i=0 ;i < length ;++i)
 	{
-		out[i+3] = OF2G_FRAME_2_BUFFER(frame)[i+3];
+		out[i] = OF2G_FRAME_2_BUFFER(frame)[i+3];
+
 	}
 
 	return length;
@@ -107,10 +104,10 @@ bool of2g_build_data_frame(unsigned char * buffer, size_t length, unsigned char 
 	size_t i;
 	for(i = 0;i < length; ++i)
 	{
-		printf("0x%x ", buffer[i]);
+//		printf("0x%x ", buffer[i]);
 		OF2G_FRAME_2_BUFFER(out)[i+3] = buffer[i];
 	}
-	printf("\n");
+//	printf("\n");
 	// place FID, ACK, Length
 	OF2G_FRAME_2_BUFFER(out)[0] = fid;
 	OF2G_FRAME_2_BUFFER(out)[2] = length;
@@ -126,7 +123,7 @@ bool of2g_build_data_frame(unsigned char * buffer, size_t length, unsigned char 
 		return true;
 	else
 		return false;
-	
+	// Log if fails
 }
 
 // This function should create an OF2G ack frame to be used as a response for
@@ -135,14 +132,13 @@ bool of2g_build_data_frame(unsigned char * buffer, size_t length, unsigned char 
 bool of2g_build_ack_frame(of2g_frame_t data_frame, of2g_frame_t out)
 {
 
-	// TODO: does the FID become the ack?
-	// does the ack frame contain data (between length and checksum)?
+	// TODO: double-check fid/ackid
 
 	// place fid,ackid,length
-	OF2G_FRAME_2_BUFFER(out)[0] = of2g_get_fid(data_frame);
-	OF2G_FRAME_2_BUFFER(out)[1] = of2g_get_ackid(data_frame);
+	OF2G_FRAME_2_BUFFER(out)[0] = of2g_get_fid(data_frame) + 1; // FID is the next frame were expecting
+	OF2G_FRAME_2_BUFFER(out)[1] = of2g_get_fid(data_frame);	// ACKid is the fid of the received data frame
 
-	OF2G_FRAME_2_BUFFER(out)[2] = 5; // assuming ACK has no data, is this value 0?
+	OF2G_FRAME_2_BUFFER(out)[2] = 0; // assuming ACK has no data
 
 	// place checksum
 	HE100_checksum frame_checksum = HE100_fletcher16((char*)OF2G_FRAME_2_BUFFER(out), 3);

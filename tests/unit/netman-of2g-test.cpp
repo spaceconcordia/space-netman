@@ -9,6 +9,7 @@ class Netman_of2g_Test : public ::testing::Test {
 
   }
   of2g_frame_t valid_dataframe = { 0x73, 0x0, 0x09, 0x6f, 0x6c, 0x69, 0x76, 0x69, 0x65, 0x72, 0x73, 0x63, 0x4c, 0xe8};
+  of2g_frame_t expected_ackframe = { 0x74, 0x73, 0x0, 0xe7, 0x42};
   unsigned char buffer[256] = {0x6f, 0x6c, 0x69, 0x76, 0x69, 0x65, 0x72, 0x73, 0x63};
   
 };
@@ -17,7 +18,7 @@ class Netman_of2g_Test : public ::testing::Test {
 TEST_F(Netman_of2g_Test, GoodChecksum) {
   // verify check sum bytes
   ASSERT_EQ(1, of2g_valid_frame(valid_dataframe));
-
+  ASSERT_EQ(1, of2g_valid_frame(expected_ackframe));
 }
 
 // Check FID byte
@@ -51,20 +52,41 @@ TEST_F(Netman_of2g_Test, GoodDataFrame) {
   
   size_t length = 9;
   unsigned char fid = 0x73;
-  of2g_frame_t out;
-  ASSERT_EQ(1, of2g_build_data_frame(buffer,length,fid,out));
-  ASSERT_EQ(valid_dataframe, out);
+	
+  of2g_frame_t resulting_dataframe;
+  ASSERT_EQ(1, of2g_build_data_frame(buffer,length,fid,resulting_dataframe));
+  ASSERT_STREQ(reinterpret_cast<const char*>(valid_dataframe),reinterpret_cast<const char*>(resulting_dataframe));
  
 }
-/*
+
 
 // Check for correct ACk frame built
 TEST_F(Netman_of2g_Test, GoodAckFrame) {
   
-  unsigned char fid = 0x01;
-  of2g_frame_t * out;
-  ASSERT_EQ(1, of2g_build_ack_frame(buffer,out));
-  ASSERT_STREQ(valid_ackframe, out);
+  of2g_frame_t resulting_ackframe;
+  ASSERT_EQ(1, of2g_build_ack_frame(valid_dataframe,resulting_ackframe));
+  ASSERT_STREQ(reinterpret_cast<const char*>(expected_ackframe), reinterpret_cast<const char*>(resulting_ackframe));
  
 }
-*/
+
+// Check for returning frame type
+TEST_F(Netman_of2g_Test, GoodACKFrameType) {
+  
+  ASSERT_EQ(OF2G_DATA, of2g_get_frametype(valid_dataframe));
+  ASSERT_EQ(OF2G_ACK, of2g_get_frametype(expected_ackframe)); 
+}
+
+// check for correct data content
+TEST_F(Netman_of2g_Test, GetGoodContent) {
+
+  unsigned char out[9];
+  size_t data_length = of2g_get_data_content(valid_dataframe, out);
+  ASSERT_EQ(data_length, of2g_get_length(valid_dataframe));
+
+  int i = 0;
+//  printf("out = %s\nbuffer = %s \nlength: %d\n ", out, buffer, strlen(reinterpret_cast<const char*>(out)));
+  for(i = 0; i < data_length; i++)
+	ASSERT_EQ(buffer[i], out[i]);
+
+ 
+}
