@@ -1,24 +1,43 @@
 // using GoogleTests
 #include "gtest/gtest.h"
-#include "../../of2g.h"
-#include "../../netman.h"
+#include "../../include/of2g.h"
+#include "../../include/netman.h"
 
 class Netman_frame_Test : public ::testing::Test {
 	protected:
 	virtual void SetUp() {
-	valid_dataframe = { };
-	valid_ackframe = { };
-	badchecksum_frame = { };
-	unsigned char buffer[256] = { };
-	netman_init(&netman);
+// test for receiving
+	netman_rx->tx_state = WAITING_FOR_ACK;
+	netman_tx->rx_state = NEW_DATA;
+
+	netman_rx->current_tx_data = {};
+	netman_rx->current_tx_ack = {};
+	netman_rx->current_tx_fid = 0x02;
+
+	netman_rx->current_rx_data = {};
+	netman_rx->current_rx_ack = {};
+	netman_rx->current_rx_fid = 0x01;
+// test for sending
+	netman_tx->tx_state = NOT_WAITING_FOR_ACK;
+	netman_tx->rx_state = DUP_DATA;
+	
+	netman_tx->current_tx_data = {};
+	netman_tx->current_tx_ack = {};
+	netman_tx->current_tx_fid = 0x03;
+	
+	netman_tx->current_rx_data = {};
+	netman_tx->current_rx_ack = {};
+	netman_tx->current_rx_fid = 0x02;
+	
 }
-
-	of2g_frame_t valid_dataframe;
-	of2g_frame_t valid_ackframe;
-	of2g_frame_t badchecksum_frame;
-	netman_t * netman;
+	
+	
+	of2g_frame_t valid_dataframe = {};
+	unsigned char * buffer;
+	netman_t * netman_rx;
+	netman_t * netman_tx;
 };
-
+/*
 // Check new data frame was built according to raw data and was stored correctly
 TEST_F(Netman_frame_Test, GoodDataFrameToSend) {
 	netman_new_tx_bytes(netman, buffer, length);
@@ -57,6 +76,13 @@ TEST_F(Netman_frame_Test, GoodDataFrameRead) {
 	ASSERT_STREQ(expected_str, netman->current_rx_data);
 }
 
+
+TEST_F(Netman_frame_Test, DupDataFrameRead) {
+
+
+}
+
+
 TEST_F(Netman_frame_Test, GoodAckFrameRead) {
  // ACK: duplicate ack, new ack
 	netman_rx_frame(netman, valid_ackframe);
@@ -64,4 +90,4 @@ TEST_F(Netman_frame_Test, GoodAckFrameRead) {
 	// test memcpy
 	ASSERT_STREQ(expected_str, netman->current_rx_ack);
 }
-
+*/

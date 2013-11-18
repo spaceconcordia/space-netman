@@ -69,24 +69,22 @@ void netman_rx_frame(netman_t * netman, of2g_frame_t frame)
 		unsigned char rx_ackid = of2g_get_ackid(netman->current_rx_ack);
 		if(rx_ackid == of2g_get_ackid(frame))
 		{
-			netman->tx = WAITING_FOR_ACK;
+			netman->tx_state = WAITING_FOR_ACK;
 		}
 
 	}
 	else if (frametype == OF2G_DATA) { // received something, need to send ack
-		//if(netman->tx_state == NOT_WAITING_FOR_ACK) {
-			// check for duplicate data/fid ?
+			netman->tx_state = NOT_WAITING_FOR_ACK; // received data, therefore not waiting for ack		
 			if(netman->current_rx_fid != of2g_get_fid(frame)) // different fid = new data, do we increment fid to say were expecting next data frame?
 			{
 				netman->rx_state = NEW_DATA;
 				netman->current_rx_fid = of2g_get_fid(frame);
  	  			memcpy(&netman->current_rx_data, frame, sizeof(of2g_frame_t));
 			}
-	//	}
-		else 
-			netman->rx_state = DUP_DATA;
-		
-	}
+			else 
+				netman->rx_state = DUP_DATA;
+	}	
+	
 
 	else {
 		// wasn't data or ack frame

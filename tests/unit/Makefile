@@ -1,4 +1,3 @@
-#GoogleTests
 # A sample Makefile for building Google Test and using it in user
 # tests.  Please tweak it to suit your environment and project.  You
 # may want to move it to your project's root directory.
@@ -15,7 +14,7 @@
 
 # Points to the root of Google Test, relative to where this file is.
 # Remember to tweak this if you move this file.
-GTEST_DIR = ~/development/gtest-1.7.0
+GTEST_DIR = /home/olihoops/development/gtest-1.7.0
 
 # Where to find user code.
 USER_DIR = ../../../space-netman
@@ -68,32 +67,25 @@ gtest.a : gtest-all.o
 gtest_main.a : gtest-all.o gtest_main.o
 	$(AR) $(ARFLAGS) $@ $^
 
-# Builds a sample test.  A test should link with either gtest.a or
-# gtest_main.a, depending on whether it defines its own main()
-# function.
+###########################
 
-#sample1.o : $(USER_DIR)/sample1.cc $(USER_DIR)/sample1.h $(GTEST_HEADERS)
-#	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/sample1.cc
+netman.o : $(USER_DIR)/src/netman.c $(USER_DIR)/include/netman.h of2g.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/src/netman.c
 
-#sample1_unittest.o : $(USER_DIR)/sample1_unittest.cc \
-#                     $(USER_DIR)/sample1.h $(GTEST_HEADERS)
-#	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/sample1_unittest.cc
-#
-#sample1_unittest : sample1.o sample1_unittest.o gtest_main.a
-#	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
-
-
-#########################################
-
-he100.o : $(USER_DIR)/src/of2g.c $(USER_DIR)/include/of2g.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/src/he100.c
-
-of2g.o : $(USER_DIR)/src/of2g.c $(USER_DIR)/include/of2g.h $(GTEST_HEADERS)
+of2g.o : $(USER_DIR)/src/of2g.c $(USER_DIR)/include/of2g.h he100.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/src/of2g.c
 
-netman-of2g-test.o : $(USER_DIR)/tests/unit/netman-of2g-test.cpp \
-                     $(USER_DIR)/include/of2g.h $(GTEST_HEADERS)
+he100.o : $(USER_DIR)/src/he100.c $(USER_DIR)/include/he100.h $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/src/he100.c
+
+netman-of2g-test.o : $(USER_DIR)/tests/unit/netman-of2g-test.cpp $(USER_DIR)/include/of2g.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/tests/unit/netman-of2g-test.cpp
 
-netman-of2g-test : he100.o of2g.o netman-of2g-test.o gtest_main.a
+netman-of2g-test : of2g.o netman-of2g-test.o he100.o gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+
+netman-frame-test.o : $(USER_DIR)/tests/unit/netman-frame-test.cpp $(USER_DIR)/include/netman.h $(GTEST_HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/tests/unit/netman-frame-test.cpp
+
+netman-frame-test : of2g.o netman-of2g-test.o netman.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
