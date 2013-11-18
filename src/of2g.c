@@ -1,4 +1,4 @@
-#include "../include/he100.h"
+#include <SC_he100.h>
 #include "../include/of2g.h"
 
 // This function should inspect the given of2g frame and return
@@ -38,7 +38,7 @@ of2g_frametype_t of2g_get_frametype(of2g_frame_t frame)
 {
 
 	// TODO: Need to know how to verify if DATA or ACK
-	unsigned char fid   = of2g_get_fid(frame);
+	// commented to avoid unused variable warning -> unsigned char fid   = of2g_get_fid(frame);
 	unsigned char ackid = of2g_get_ackid(frame);
 
 	if(ackid == 0) {

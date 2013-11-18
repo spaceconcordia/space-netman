@@ -15,7 +15,7 @@ PROJ    = netman
 SRCS    := main.c netman.c of2g.c transceiver.c
 SRCS    := $(addprefix src/, $(SRCS))
 
-LIBS     := NamedPipe.a Net2Com.a timer.a he100.a
+LIBS     := Net2Com.a NamedPipe.a timer.a libhe100.a 
 LIBS     := $(addprefix lib/, $(LIBS))
 INCFLAGS = -I./lib/include
 
