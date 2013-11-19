@@ -15,7 +15,7 @@ PROJ    = netman
 SRCS    := main.c netman.c of2g.c transceiver.c
 SRCS    := $(addprefix src/, $(SRCS))
 
-LIBS     := Net2Com.a NamedPipe.a timer.a libhe100.a 
+LIBS     := Net2Com.a NamedPipe.a libtimer.a libhe100.a 
 LIBS     := $(addprefix lib/, $(LIBS))
 INCFLAGS = -I./lib/include
 
@@ -74,5 +74,5 @@ $(BIN_DIR):
 
 # Our binary requires all our o files, and is fairly simple to make
 $(BIN_FILE): $(SRCS:%.c=%.o) $(LIBS) $(BIN_DIR)
-	$(LD) $(LDFLAGS) $(filter %.o, $^) $(filter %.a, $^) -o $@
+	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
 

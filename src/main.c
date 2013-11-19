@@ -21,7 +21,7 @@ int main()
 
    while(1){
 
-      loop_until_session_established(&netman, &net2com);
+      //loop_until_session_established(&netman, &net2com);
 
       loop_until_session_closed(&netman, &net2com);
    }
@@ -66,8 +66,10 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
    timer_t resend_timer = timer_get();
 
    // values in milliseconds
-   const uint32_t RESEND_TIMEOUT =      10 * 1000;
-   const uint32_t WINDOW_TIMEOUT = 15 * 60 * 1000;
+   const uint32_t RESEND_TIMEOUT =      10;
+   const uint32_t WINDOW_TIMEOUT = 15 * 60;
+
+   timer_start(&window_timer, WINDOW_TIMEOUT, 0);
 
    // We continue in the loop as long as the window is open
    while( ! timer_complete(&window_timer) ){
@@ -91,12 +93,14 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
             transceiver_write(netman->current_tx_data); 
             // We also restart our timer so that we know how long
             // we've been waiting.
-            timer_start(&resend_timer, RESEND_TIMEOUT);
+            printf("Starting resend timer at line %d\n", __LINE__);
+            timer_start(&resend_timer, RESEND_TIMEOUT, 0);
          }
       }
 
       // If there is new data incoming...
       if(transceiver_read(frame)){
+         printf("New data (%s:%d)\n", __FILE__, __LINE__);
          // ... we process it.
          netman_rx_frame(netman, frame);
 
@@ -104,20 +108,23 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
          // action.
          switch(netman->rx_state){
             case NEW_ACK:
+               printf("  NEW_ACK, restarting window (%s:%d)\n", __FILE__, __LINE__);
                // We don't need to do anything other than keep
                // the window open.
-               timer_start(&window_timer, RESEND_TIMEOUT);
+               timer_start(&window_timer, WINDOW_TIMEOUT, 0);
                break;
             case NEW_DATA:
+               printf("  NEW_DATA, sending ACK, writing commander pipe (%s:%d)\n", __FILE__, __LINE__);
                // We need to acknowledge that we received the data
                // ok, send the data to the commander, and finally
                // we need to make sure the window stays open.
                transceiver_write(netman->current_tx_ack);
                n_bytes = of2g_get_data_content(netman->current_rx_data, (unsigned char *)buffer);
                net2com->WriteToDataPipe(buffer, n_bytes);
-               timer_start(&window_timer, WINDOW_TIMEOUT);
+               timer_start(&window_timer, WINDOW_TIMEOUT, 0);
                break;
             case DUP_DATA:
+               printf("  DUP_DATA, resending ACK (%s:%d)\n", __FILE__, __LINE__);
                // Duplicate DATA? They must not have got our ACK, lets
                // send it again.
                transceiver_write(netman->current_tx_ack); 
@@ -126,6 +133,7 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
             case BAD_FID:
             case BAD_CSUM:
             default:
+               printf("  SOME KIND OF GARBAGE, ignore it (%s:%d)\n", __FILE__, __LINE__);
                // Some kind of garbage, who cares, just ignore it.
                break;
          }
