@@ -1,6 +1,7 @@
 #include "../include/netman.h"
 #include <string.h>
-
+#include <stdio.h>
+#include <stdlib.h>
 
 // Should perform any and all necessary initialization of netman
 // netman must be ready to use after this.
@@ -23,7 +24,7 @@ void netman_init(netman_t * netman)
 // store it in netman->current_tx_data
 void netman_new_tx_bytes(netman_t * netman, unsigned char * buffer, size_t length)
 {
-	char fid = netman->current_tx_fid;
+	unsigned char fid = netman->current_tx_fid;
 	of2g_build_data_frame(buffer, length, fid, netman->current_tx_data);
 	netman->tx_state = WAITING_FOR_ACK;
 

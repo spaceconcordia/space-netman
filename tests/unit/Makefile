@@ -14,7 +14,7 @@
 
 # Points to the root of Google Test, relative to where this file is.
 # Remember to tweak this if you move this file.
-GTEST_DIR = /home/olihoops/development/gtest-1.7.0
+GTEST_DIR = ../../../gtest-1.7.0
 
 # Where to find user code.
 USER_DIR = ../../../space-netman
@@ -29,7 +29,7 @@ CXXFLAGS += -g -Wall -Wextra -pthread
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS = netman-of2g-test 
+TESTS = netman-of2g-test netman-frame-test
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -69,13 +69,13 @@ gtest_main.a : gtest-all.o gtest_main.o
 
 ###########################
 
-netman.o : $(USER_DIR)/src/netman.c $(USER_DIR)/include/netman.h of2g.o
+netman.o : $(USER_DIR)/src/netman.c $(USER_DIR)/include/netman.h of2g.o he100.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/src/netman.c
 
 of2g.o : $(USER_DIR)/src/of2g.c $(USER_DIR)/include/of2g.h he100.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/src/of2g.c
 
-he100.o : $(USER_DIR)/src/he100.c $(USER_DIR)/include/he100.h $(GTEST_HEADERS)
+he100.o : $(USER_DIR)/src/he100.c $(USER_DIR)/include/SC_he100.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/src/he100.c
 
 netman-of2g-test.o : $(USER_DIR)/tests/unit/netman-of2g-test.cpp $(USER_DIR)/include/of2g.h $(GTEST_HEADERS)
@@ -87,5 +87,5 @@ netman-of2g-test : of2g.o netman-of2g-test.o he100.o gtest_main.a
 netman-frame-test.o : $(USER_DIR)/tests/unit/netman-frame-test.cpp $(USER_DIR)/include/netman.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/tests/unit/netman-frame-test.cpp
 
-netman-frame-test : of2g.o netman-of2g-test.o netman.o gtest_main.a
+netman-frame-test : he100.o of2g.o netman-frame-test.o netman.o gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@

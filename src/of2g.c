@@ -1,6 +1,8 @@
 #include <SC_he100.h>
 #include "../include/of2g.h"
 
+unsigned char g_ackFID = 0x0;
+
 // This function should inspect the given of2g frame and return
 // a bool indicating whether it is valid. At a minimum this should
 // mean verifying the checksum and making sure the frame id and ack
@@ -135,7 +137,9 @@ bool of2g_build_ack_frame(of2g_frame_t data_frame, of2g_frame_t out)
 	// TODO: double-check fid/ackid
 
 	// place fid,ackid,length
-	OF2G_FRAME_2_BUFFER(out)[0] = of2g_get_fid(data_frame) + 1; // FID is the next frame were expecting
+	if(g_ackFID > 255)
+		g_ackFID = 0x0;
+	OF2G_FRAME_2_BUFFER(out)[0] = ++g_ackFID; // FID of the ack frame 
 	OF2G_FRAME_2_BUFFER(out)[1] = of2g_get_fid(data_frame);	// ACKid is the fid of the received data frame
 
 	OF2G_FRAME_2_BUFFER(out)[2] = 0; // assuming ACK has no data
