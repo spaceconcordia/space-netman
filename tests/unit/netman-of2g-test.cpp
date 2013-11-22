@@ -8,8 +8,8 @@ class Netman_of2g_Test : public ::testing::Test {
   virtual void SetUp() {
 
   }
-  of2g_frame_t valid_dataframe = { 0x73, 0x0, 0x09, 0x6f, 0x6c, 0x69, 0x76, 0x69, 0x65, 0x72, 0x73, 0x63, 0x4c, 0xe8};
-  of2g_frame_t expected_ackframe = { 0x01, 0x73, 0x0, 0x74, 0xe9};
+  of2g_frame_t valid_dataframe = { 0x01, 0x0, 0x09, 0x6f, 0x6c, 0x69, 0x76, 0x69, 0x65, 0x72, 0x73, 0x63, 0xda, 0x90};
+  of2g_frame_t expected_ackframe = { 0x01, 0x01, 0x0, 0x02, 0x05};
   unsigned char buffer[256] = {0x6f, 0x6c, 0x69, 0x76, 0x69, 0x65, 0x72, 0x73, 0x63};
   
 };
@@ -24,7 +24,7 @@ TEST_F(Netman_of2g_Test, GoodChecksum) {
 // Check FID byte
 TEST_F(Netman_of2g_Test, ValidFID) {
   // FID byte matches expected
-  ASSERT_EQ(0x73, of2g_get_fid(valid_dataframe));
+  ASSERT_EQ(0x01, of2g_get_fid(valid_dataframe));
 }
 
 
@@ -51,7 +51,7 @@ TEST_F(Netman_of2g_Test, ValidFrameLength) {
 TEST_F(Netman_of2g_Test, GoodDataFrame) {
   
   size_t length = 9;
-  unsigned char fid = 0x73;
+  unsigned char fid = 0x01;
 	
   of2g_frame_t resulting_dataframe;
   ASSERT_TRUE(of2g_build_data_frame(buffer,length,fid,resulting_dataframe));
