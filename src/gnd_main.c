@@ -8,8 +8,7 @@
 #include "../include/netman.h"
 #include "../include/transceiver.h"
 
-void loop_until_session_closed(netman_t *, Net2Com * net2com);
-void loop_until_session_established(netman_t *, Net2Com * net2com);
+void loop_until_session_closed(netman_t *);
 
 int main()
 {
@@ -17,44 +16,16 @@ int main()
    netman_t netman;
    netman_init(&netman);
 
-   Net2Com net2com(PIPE_TWO, PIPE_ONE, PIPE_FOUR, PIPE_THREE);
-
    while(1){
 
-      //loop_until_session_established(&netman, &net2com);
-
-      loop_until_session_closed(&netman, &net2com);
+      loop_until_session_closed(&netman);
    }
 
    return 0;
 }
 
-void loop_until_session_established(netman_t * netman, Net2Com * net2com){
 
-   const size_t BUFFLEN = 256;
-   char buffer[BUFFLEN]; // TODO - exact max size
-   size_t n_bytes;
-
-   of2g_frame_t frame;
-
-   while(1){
-
-      if(
-            transceiver_read(frame) &&
-            of2g_valid_frame(frame) &&
-            of2g_get_frametype(frame) == OF2G_DATA
-      ){
-
-         // transceiver_write(netman->current_tx_ack); // TODO - handle intial ACK and session starting!!!
-         n_bytes = of2g_get_data_content(netman->current_rx_data, (unsigned char *)buffer);
-         net2com->WriteToDataPipe(buffer, n_bytes);
-
-         break;
-      }
-   }
-}
-
-void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
+void loop_until_session_closed(netman_t * netman){
 
    const size_t BUFFLEN = 256;
    char buffer[BUFFLEN]; // TODO - exact max size
@@ -79,7 +50,10 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
          // ...and we've been waiting for a while...
          if( timer_complete(&resend_timer) ){
             // ...then we're impatient and we resend our data.
+            printf("About to re-TX data over transceiver!!\n");
             transceiver_write(netman->current_tx_data);
+            printf("Done re-TX data over transceiver!!\n");
+            timer_start(&resend_timer, RESEND_TIMEOUT, 0);
          }
       }else{
          // Otherwise, logic tells us we most not be waiting for
@@ -87,9 +61,9 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
          // send it!
          assert(netman->tx_state == NOT_WAITING_FOR_ACK);
          // If we have any new data to send...
-         printf("About to read from commander data pipe\n");
-         if(0 < (n_bytes = net2com->ReadFromDataPipe(buffer, BUFFLEN))){
-            printf("Read and got data!!\n");
+         printf(">>> ");
+         if(0 < (n_bytes = scanf("%31s", buffer))){
+            buffer[n_bytes] = '\0';
             // ... then we send it!
             netman_new_tx_bytes(netman, (unsigned char *)buffer, n_bytes);
             printf("About to TX data over transceiver!!\n");
@@ -104,7 +78,6 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
          }
       }
 
-      printf("About to read from transceiver!!\n");
       // If there is new data incoming...
       if(transceiver_read(frame)){
          printf("New data (%s:%d)\n", __FILE__, __LINE__);
@@ -125,9 +98,20 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
                // We need to acknowledge that we received the data
                // ok, send the data to the commander, and finally
                // we need to make sure the window stays open.
+               printf("    TX'ing ACK... ");
                transceiver_write(netman->current_tx_ack);
+               printf("    done\n");
                n_bytes = of2g_get_data_content(netman->current_rx_data, (unsigned char *)buffer);
-               net2com->WriteToDataPipe(buffer, n_bytes);
+
+               for(uint8_t i = 0; i < n_bytes; ++i){
+                  uint8_t c = buffer[i];
+                  if(c >= ' ' && c <= '~'){
+                     putchar(c);
+                  }else{
+                     printf(" <%2X> ", c);
+                  }
+               }
+
                timer_start(&window_timer, WINDOW_TIMEOUT, 0);
                break;
             case DUP_DATA:
@@ -144,8 +128,6 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
                // Some kind of garbage, who cares, just ignore it.
                break;
          }
-      }else{
-         printf("got nothing... :(\n");
       }
    }
 }

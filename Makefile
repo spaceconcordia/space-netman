@@ -1,5 +1,5 @@
 # Warning flags (what did you expect)
-WARNINGS= -Wall -Wextra -Werror
+WARNINGS= -Wall -Wextra -fpermissive
 # Optimization level for gcc
 OPT_LVL = 1
 # C Compiler
@@ -12,19 +12,20 @@ LDFLAGS = -O$(OPT_LVL) $(WARNINGS) -lrt
 
 PROJ    = netman
 # Source files that we will use
-SRCS    := main.c netman.c of2g.c transceiver.c
+SRCS    := netman.c of2g.c
 SRCS    := $(addprefix src/, $(SRCS))
 
-LIBS     := Net2Com.a NamedPipe.a libtimer.a libhe100.a 
+LIBS     := Net2Com.a NamedPipe.a libtimer.a libhe100.a
 LIBS     := $(addprefix lib/, $(LIBS))
 INCFLAGS = -I./lib/include
 
 BIN_DIR = bin
-BIN_FILE= $(BIN_DIR)/$(PROJ)
-ALL_TRG = $(BIN_FILE)
+SAT_BIN_FILE= $(BIN_DIR)/sat
+GND_BIN_FILE= $(BIN_DIR)/gnd
+ALL_TRG = $(SAT_BIN_FILE) $(GND_BIN_FILE)
 
 # Generate exact dependencies using a smart method that I found online.
-# 
+#
 # The basic idea is that we don't need to know the dependencies until
 # after the first time we build a file. If the file itself changes, then
 # obviously we will have to recalculate its dependencies, but %.c is always
@@ -32,7 +33,7 @@ ALL_TRG = $(BIN_FILE)
 #
 # TODO - find the link I got this method from
 DEP_DIR     = .deps
-MAKE_DEPEND = mkdir -p $(DEP_DIR)/$(dir $*); $(CPP) -MM $(CCFLAGS) $< -o $(DEP_DIR)/$*.d 
+MAKE_DEPEND = mkdir -p $(DEP_DIR)/$(dir $*); $(CPP) -MM $(CCFLAGS) $< -o $(DEP_DIR)/$*.d
 
 # Phony targets
 .PHONY: all clean
@@ -60,19 +61,35 @@ $(BIN_DIR):
 # dependency file for it, as explained above
 %.o: %.cpp $(DEP_DIR)
 	$(CC) $(INCFLAGS) $(CCFLAGS) $< -o $@
-	@$(MAKE_DEPEND) 
+	@$(MAKE_DEPEND)
 
 %.o: %.c $(DEP_DIR)
 	$(CC) $(INCFLAGS) $(CCFLAGS) $< -o $@
-	@$(MAKE_DEPEND) 
+	@$(MAKE_DEPEND)
+
+src/sat_transceiver.o: src/transceiver.c $(DEP_DIR)
+	$(CC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="sat-out-gnd-in-tee1"' \
+	                  -D'TRNSCVR_RX_PIPE="gnd-out-sat-in"' \
+							-D'USE_PIPE_TRNSCVR' \
+							$(CCFLAGS) $< -o $@
+
+src/gnd_transceiver.o: src/transceiver.c $(DEP_DIR)
+	$(CC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="gnd-out-sat-in"' \
+	                  -D'TRNSCVR_RX_PIPE="sat-out-gnd-in-tee2"' \
+							-D'USE_PIPE_TRNSCVR' \
+							$(CCFLAGS) $< -o $@
 
 # For each c file, we compile it to an o file, and then make a
 # dependency file for it, as explained above
 #%.o: %.c $(DEP_DIR)
 #	$(CC) $(INCFLAGS) $(CCFLAGS) $< -o $@
-#	@$(MAKE_DEPEND) 
+#	@$(MAKE_DEPEND)
 
 # Our binary requires all our o files, and is fairly simple to make
-$(BIN_FILE): $(SRCS:%.c=%.o) $(LIBS) $(BIN_DIR)
+$(GND_BIN_FILE): $(SRCS:%.c=%.o) src/gnd_transceiver.o src/gnd_main.o $(LIBS) $(BIN_DIR)
+	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
+
+# Our binary requires all our o files, and is fairly simple to make
+$(SAT_BIN_FILE): $(SRCS:%.c=%.o) src/sat_transceiver.o src/sat_main.o $(LIBS) $(BIN_DIR)
 	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
 

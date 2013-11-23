@@ -50,44 +50,45 @@ void netman_rx_frame(netman_t * netman, of2g_frame_t frame)
 		netman->rx_state = BAD_CSUM;
 
 	if(of2g_get_fid(frame) == 0x0)
-		netman->rx_state = BAD_FID;	
+		netman->rx_state = BAD_FID;
 
 	of2g_frametype_t frametype = of2g_get_frametype(frame);
-	if (frametype == OF2G_ACK) 
+	if (frametype == OF2G_ACK)
 	{
 		// Received the same ack, still waiting for new
 		// ACK of the received frame matches my last sent FID, that means we received ack
 		if (netman->current_tx_fid == of2g_get_ackid(frame))
 		{
 			unsigned char rx_ackid = of2g_get_ackid(netman->current_rx_ack);
-			if(rx_ackid != of2g_get_ackid(frame)) 
+			if(rx_ackid != of2g_get_ackid(frame))
 			{
 				printf("Received new ACK frame\n");
 				netman->tx_state = NOT_WAITING_FOR_ACK;
 				netman->rx_state = NEW_ACK;
 		  	memcpy(&netman->current_rx_ack, frame, sizeof(of2g_frame_t));
 			}
-			else 
+			else
 			{
 				printf("Still waiting for new ack\n");
 				netman->tx_state = WAITING_FOR_ACK;
 			}
 		}
 	}
-	else if (frametype == OF2G_DATA) 
-	{ 
-		netman->tx_state = NOT_WAITING_FOR_ACK; 
+	else if (frametype == OF2G_DATA)
+	{
+		//netman->tx_state = NOT_WAITING_FOR_ACK;
 		if(netman->current_rx_fid != of2g_get_fid(frame)) // received frame is different from last received
 		{
 			printf("Received new data frame\n");
 			netman->rx_state = NEW_DATA;
 			netman->current_rx_fid = of2g_get_fid(frame);
  			memcpy(&netman->current_rx_data, frame, sizeof(of2g_frame_t));
+         build_ack_frame(netman, frame);
 		}
-		else 
+		else
 			netman->rx_state = DUP_DATA;
-	}	
-	
+	}
+
 	else {
 		// wasn't data or ack frame
 	}
