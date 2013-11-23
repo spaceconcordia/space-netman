@@ -1,7 +1,7 @@
 #include <SC_he100.h>
 #include "../include/of2g.h"
 
-unsigned char g_ackFID = 0x0;
+unsigned char g_ackFID = 0x01;
 
 // This function should inspect the given of2g frame and return
 // a bool indicating whether it is valid. At a minimum this should
@@ -11,9 +11,10 @@ unsigned char g_ackFID = 0x0;
 // return true if `frame` is good and false if it is bad
 bool of2g_valid_frame(of2g_frame_t frame)
 {
-	// TODO: what do we need to know about FID and ACK for it to be valid?
+	size_t length = OF2G_FRAME_2_BUFFER(frame)[2]; 
 
-	size_t length = OF2G_FRAME_2_BUFFER(frame)[2]; // frames bytes are char, does this cause issues?
+	if(of2g_get_fid(frame) == 0x0)
+		return false;
 
 	// verify checksum
 	HE100_checksum frame_checksum = HE100_fletcher16((char*)OF2G_FRAME_2_BUFFER(frame), length+3);
@@ -28,7 +29,6 @@ bool of2g_valid_frame(of2g_frame_t frame)
 		printf("sum2 0x%x is not 0x%x\n", frame_checksum.sum2,OF2G_FRAME_2_BUFFER(frame)[length+3+1]);
 		return false;
 	}
-	
 }
 
 // This function should inspect the given of2g frame and return its
@@ -38,25 +38,18 @@ bool of2g_valid_frame(of2g_frame_t frame)
 // `frame` is assumed to be a good frame (`valid_of2g_frame(frame)` returns true)
 of2g_frametype_t of2g_get_frametype(of2g_frame_t frame)
 {
-
-	// TODO: Need to know how to verify if DATA or ACK
-	// commented to avoid unused variable warning -> unsigned char fid   = of2g_get_fid(frame);
-	unsigned char ackid = of2g_get_ackid(frame);
-
-	if(ackid == 0) {
+	if(of2g_get_ackid(frame) == 0) {
 		return OF2G_DATA;
 	}
 	else {
 		return OF2G_ACK;
 	}
-
 }
 
 // This function should return the value of the fid field of `frame`
 unsigned char of2g_get_fid(of2g_frame_t frame)
 {
 	return OF2G_FRAME_2_BUFFER(frame)[0];
-
 }
 
 // This function should return the value of the ack id field of `frame`
@@ -79,19 +72,15 @@ size_t of2g_get_length(of2g_frame_t frame)
 // This function should return the number of bytes stored into `out`
 size_t of2g_get_data_content(of2g_frame_t frame, unsigned char * out)
 {
-
-	// data length - FID, ack, length, 2 bytes for chksum
 	size_t length = OF2G_FRAME_2_BUFFER(frame)[2];
 	
 	size_t i;
 	for(i=0 ;i < length ;++i)
 	{
 		out[i] = OF2G_FRAME_2_BUFFER(frame)[i+3];
-
 	}
 
 	return length;
-
 }
 
 // This function should wrap the first `length` bytes of `buffer` in an
@@ -102,20 +91,16 @@ size_t of2g_get_data_content(of2g_frame_t frame, unsigned char * out)
 // should return false if the frame can't be built for any reason.
 bool of2g_build_data_frame(unsigned char * buffer, size_t length, unsigned char fid, of2g_frame_t out)
 {
-	// wrap "length" bytes of buffer in of2g data frame
 	size_t i;
 	for(i = 0;i < length; ++i)
 	{
-//		printf("0x%x ", buffer[i]);
 		OF2G_FRAME_2_BUFFER(out)[i+3] = buffer[i];
 	}
-//	printf("\n");
-	// place FID, ACK, Length
+
 	OF2G_FRAME_2_BUFFER(out)[0] = fid;
-	OF2G_FRAME_2_BUFFER(out)[2] = length;
-	// TODO: ACK
 	OF2G_FRAME_2_BUFFER(out)[1] = 0x0;
-	// place checksum
+	OF2G_FRAME_2_BUFFER(out)[2] = length;
+	
 	HE100_checksum frame_checksum = HE100_fletcher16((char *)OF2G_FRAME_2_BUFFER(out), length+3);
 
 	OF2G_FRAME_2_BUFFER(out)[3+length]   = frame_checksum.sum1;
@@ -133,15 +118,13 @@ bool of2g_build_data_frame(unsigned char * buffer, size_t length, unsigned char 
 // was built successfully, and false otherwise.
 bool of2g_build_ack_frame(of2g_frame_t data_frame, of2g_frame_t out)
 {
+	OF2G_FRAME_2_BUFFER(out)[0] = g_ackFID; // FID of the ack frame 
+	if(g_ackFID == 255)
+		g_ackFID = 0x00;
 
-	// TODO: double-check fid/ackid
+	g_ackFID += 1;
 
-	// place fid,ackid,length
-	if(g_ackFID > 255)
-		g_ackFID = 0x0;
-	OF2G_FRAME_2_BUFFER(out)[0] = ++g_ackFID; // FID of the ack frame 
 	OF2G_FRAME_2_BUFFER(out)[1] = of2g_get_fid(data_frame);	// ACKid is the fid of the received data frame
-
 	OF2G_FRAME_2_BUFFER(out)[2] = 0; // assuming ACK has no data
 
 	// place checksum
@@ -157,11 +140,11 @@ bool of2g_build_ack_frame(of2g_frame_t data_frame, of2g_frame_t out)
 	
 	/*
 	Log(FILE* lf, Priority ePriority, string process, string msg);
-	
 	*/
 }
 
-size_t of2g_get_frame_length(of2g_frame_t frame){
+size_t of2g_get_frame_length(of2g_frame_t frame)
+{
    size_t length = frame[2] + 5;
    return length;
 }

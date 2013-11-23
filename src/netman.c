@@ -26,70 +26,68 @@ void netman_init(netman_t * netman)
 // store it in netman->current_tx_data
 void netman_new_tx_bytes(netman_t * netman, unsigned char * buffer, size_t length)
 {
-	if(g_dataFID > 255)
-		g_dataFID = 1;
-
 	netman->current_tx_fid = g_dataFID;
 	of2g_build_data_frame(buffer, length, g_dataFID, netman->current_tx_data);
 	netman->tx_state = WAITING_FOR_ACK;
+	if(g_dataFID == 255)
+		g_dataFID = 0x0;
+
 	g_dataFID += 1;
 }
 
 // Build an of2g ACK frame based on the given data frame
 void build_ack_frame (netman_t * netman, of2g_frame_t data_frame)
 {
-	// TODO: check if ack frame contains data (between length and checksum
 	of2g_build_ack_frame(data_frame, netman->current_tx_ack);
-	netman->current_tx_fid = of2g_get_fid(netman->current_tx_ack); // TODO: Check logic again
-	
+	netman->current_tx_fid = of2g_get_fid(netman->current_tx_ack);
 }
 
 // This function should handle the received `frame`, changing the state
 // of `netman` and updating `current_*x_*` members appropriately
 void netman_rx_frame(netman_t * netman, of2g_frame_t frame)
 {
-	// TODO: verify conditions for each state
-
-	// if bad check sum
 	if(!of2g_valid_frame(frame))
 		netman->rx_state = BAD_CSUM;
-	
-	if(of2g_get_fid(frame) > 255)
-		netman->rx_state = BAD_FID;	// TODO: Not sure how to know if bad FID
-	// discard frame
 
-	// get frametype
+	if(of2g_get_fid(frame) == 0x0)
+		netman->rx_state = BAD_FID;	
+
 	of2g_frametype_t frametype = of2g_get_frametype(frame);
-	if (frametype == OF2G_ACK) {
+	if (frametype == OF2G_ACK) 
+	{
+		// Received the same ack, still waiting for new
 		// ACK of the received frame matches my last sent FID, that means we received ack
 		if (netman->current_tx_fid == of2g_get_ackid(frame))
 		{
-			netman->tx_state = NOT_WAITING_FOR_ACK;
-			netman->rx_state = NEW_ACK;
-		        memcpy(&netman->current_rx_ack, frame, sizeof(of2g_frame_t));
-		}
-
-		// Received the same ack, still waiting for new
-		unsigned char rx_ackid = of2g_get_ackid(netman->current_rx_ack);
-		if(rx_ackid == of2g_get_ackid(frame))
-		{
-			netman->tx_state = WAITING_FOR_ACK;
-		}
-
-	}
-	else if (frametype == OF2G_DATA) { // received something, need to send ack
-			netman->tx_state = NOT_WAITING_FOR_ACK; // received data, therefore not waiting for ack		
-			if(netman->current_rx_fid != of2g_get_fid(frame)) // different fid = new data, do we increment fid to say were expecting next data frame?
+			unsigned char rx_ackid = of2g_get_ackid(netman->current_rx_ack);
+			if(rx_ackid != of2g_get_ackid(frame)) 
 			{
-				netman->rx_state = NEW_DATA;
-				netman->current_rx_fid = of2g_get_fid(frame);
- 	  			memcpy(&netman->current_rx_data, frame, sizeof(of2g_frame_t));
+				printf("Received new ACK frame\n");
+				netman->tx_state = NOT_WAITING_FOR_ACK;
+				netman->rx_state = NEW_ACK;
+		  	memcpy(&netman->current_rx_ack, frame, sizeof(of2g_frame_t));
 			}
 			else 
-				netman->rx_state = DUP_DATA;
+			{
+				printf("Still waiting for new ack\n");
+				netman->tx_state = WAITING_FOR_ACK;
+			}
+		}
+	}
+	else if (frametype == OF2G_DATA) 
+	{ 
+		netman->tx_state = NOT_WAITING_FOR_ACK; 
+		if(netman->current_rx_fid != of2g_get_fid(frame)) // received frame is different from last received
+		{
+			printf("Received new data frame\n");
+			netman->rx_state = NEW_DATA;
+			netman->current_rx_fid = of2g_get_fid(frame);
+ 			memcpy(&netman->current_rx_data, frame, sizeof(of2g_frame_t));
+		}
+		else 
+			netman->rx_state = DUP_DATA;
 	}	
 	
-
 	else {
 		// wasn't data or ack frame
 	}

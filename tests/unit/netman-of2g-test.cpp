@@ -56,7 +56,7 @@ TEST_F(Netman_of2g_Test, GoodDataFrame) {
   of2g_frame_t resulting_dataframe;
   ASSERT_TRUE(of2g_build_data_frame(buffer,length,fid,resulting_dataframe));
 
-	int i;
+	size_t i;
 	for(i = 0;i < length + 5; i++)
 		ASSERT_EQ(valid_dataframe[i], resulting_dataframe[i]);
 }
@@ -69,8 +69,8 @@ TEST_F(Netman_of2g_Test, GoodAckFrame) {
   ASSERT_TRUE(of2g_build_ack_frame(valid_dataframe,resulting_ackframe));
 //  ASSERT_STREQ(reinterpret_cast<const char*>(expected_ackframe), reinterpret_cast<const char*>(resulting_ackframe));
   size_t frame_length = of2g_get_frame_length(expected_ackframe);
-	int i;
-	for(int i=0;i<frame_length;i++)
+	size_t i;
+	for(i=0;i<frame_length;i++)
 		ASSERT_EQ(expected_ackframe[i],resulting_ackframe[i]);
 }
 
@@ -88,7 +88,7 @@ TEST_F(Netman_of2g_Test, GetGoodContent) {
   size_t data_length = of2g_get_data_content(valid_dataframe, out);
   ASSERT_EQ(data_length, of2g_get_length(valid_dataframe));
 
-  int i = 0;
+  size_t i = 0;
 //  printf("out = %s\nbuffer = %s \nlength: %d\n ", out, buffer, strlen(reinterpret_cast<const char*>(out)));
   for(i = 0; i < data_length; i++)
 	ASSERT_EQ(buffer[i], out[i]);
