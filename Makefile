@@ -36,7 +36,7 @@ DEP_DIR     = .deps
 MAKE_DEPEND = mkdir -p $(DEP_DIR)/$(dir $*); $(CPP) -MM $(CCFLAGS) $< -o $(DEP_DIR)/$*.d
 
 # Phony targets
-.PHONY: all clean
+.PHONY: all clean namepipe
 
 # Make our dep_dir and our hex file
 all: $(ALL_TRG)
@@ -68,14 +68,14 @@ $(BIN_DIR):
 	@$(MAKE_DEPEND)
 
 src/sat_transceiver.o: src/transceiver.c $(DEP_DIR)
-	$(CC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="sat-out-gnd-in-tee1"' \
+	$(CC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="sat-out-gnd-in"' \
 	                  -D'TRNSCVR_RX_PIPE="gnd-out-sat-in"' \
 							-D'USE_PIPE_TRNSCVR' \
 							$(CCFLAGS) $< -o $@
 
 src/gnd_transceiver.o: src/transceiver.c $(DEP_DIR)
 	$(CC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="gnd-out-sat-in"' \
-	                  -D'TRNSCVR_RX_PIPE="sat-out-gnd-in-tee2"' \
+	                  -D'TRNSCVR_RX_PIPE="sat-out-gnd-in"' \
 							-D'USE_PIPE_TRNSCVR' \
 							$(CCFLAGS) $< -o $@
 
@@ -93,3 +93,12 @@ $(GND_BIN_FILE): $(SRCS:%.c=%.o) src/gnd_transceiver.o src/gnd_main.o $(LIBS) $(
 $(SAT_BIN_FILE): $(SRCS:%.c=%.o) src/sat_transceiver.o src/sat_main.o $(LIBS) $(BIN_DIR)
 	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
 
+namedpipe:
+	cd ../space-commander/                  \
+	&& make staticlibs.tar                 \
+	&& cp staticlibs.tar ../netman/lib/    \
+	&& cd ../netman/lib/                   \
+	&& tar -xf staticlibs.tar              \
+	&& ls -la                              \
+	&& rm staticlibs.tar                 \
+	&& cd ..

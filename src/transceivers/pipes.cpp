@@ -1,3 +1,7 @@
+#include <string.h>
+#include <errno.h>
+#include <assert.h>
+
 #include <NamedPipe.h>
 
 #include "../../include/of2g.h"
@@ -27,6 +31,7 @@ bool transceiver_read(of2g_frame_t frame){
       if (!hetx.Exist()) hetx.CreatePipe();
       if (!herx.Exist()) herx.CreatePipe();
       herx.persist_open('r');
+      hetx.persist_open('w');
       initialized = true;
    }
 
@@ -34,9 +39,16 @@ bool transceiver_read(of2g_frame_t frame){
 
    uint8_t frame_len  = of2g_get_frame_length(frame);
 
-   printf("Completed read of %d bytes, acquiring a %d byte long OF2G frame\n", bytes_read, frame_len);
-
-
+   if(bytes_read == 0){
+      if(errno){
+         fprintf(stderr, "0 bytes read, error: %s\n", strerror(errno));
+         assert(0);
+      }
+      return false;
+   }else{ 
+      printf("Completed read of %d bytes, acquiring a %d byte long OF2G frame\n", bytes_read, frame_len);
+      return true;
+   }
 
 }
 
@@ -49,6 +61,7 @@ void transceiver_write(of2g_frame_t frame){
       if (!hetx.Exist()) hetx.CreatePipe();
       if (!herx.Exist()) herx.CreatePipe();
       herx.persist_open('r');
+      hetx.persist_open('w');
       initialized = true;
    }
 

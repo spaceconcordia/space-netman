@@ -125,6 +125,7 @@ void loop_until_session_closed(netman_t * netman){
             case BAD_CSUM:
             default:
                printf("  SOME KIND OF GARBAGE, ignore it (%s:%d)\n", __FILE__, __LINE__);
+               assert(0);
                // Some kind of garbage, who cares, just ignore it.
                break;
          }
