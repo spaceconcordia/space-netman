@@ -96,8 +96,8 @@ $(SAT_BIN_FILE): $(SRCS:%.c=%.o) src/sat_transceiver.o src/sat_main.o $(LIBS) $(
 namedpipe:
 	cd ../space-commander/                  \
 	&& make staticlibs.tar                 \
-	&& cp staticlibs.tar ../netman/lib/    \
-	&& cd ../netman/lib/                   \
+	&& cp staticlibs.tar ../space-netman/lib/    \
+	&& cd ../space-netman/lib/                   \
 	&& tar -xf staticlibs.tar              \
 	&& ls -la                              \
 	&& rm staticlibs.tar                 \
