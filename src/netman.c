@@ -49,6 +49,7 @@ void netman_rx_frame(netman_t * netman, of2g_frame_t frame)
 	if(!of2g_valid_frame(frame))
 		netman->rx_state = BAD_CSUM;
 
+	// FID cannot be 0, otherwise the ackid of it would be 0
 	if(of2g_get_fid(frame) == 0x0)
 		netman->rx_state = BAD_FID;	
 
@@ -60,16 +61,17 @@ void netman_rx_frame(netman_t * netman, of2g_frame_t frame)
 		if (netman->current_tx_fid == of2g_get_ackid(frame))
 		{
 			unsigned char rx_ackid = of2g_get_ackid(netman->current_rx_ack);
+			// Received ack is not the same as the previously received ACK
 			if(rx_ackid != of2g_get_ackid(frame)) 
 			{
-				printf("Received new ACK frame\n");
+				printf("Received new ACK frame (%s:%d)\n", __FILE__, __LINE__);
 				netman->tx_state = NOT_WAITING_FOR_ACK;
 				netman->rx_state = NEW_ACK;
 		  	memcpy(&netman->current_rx_ack, frame, sizeof(of2g_frame_t));
 			}
 			else 
 			{
-				printf("Still waiting for new ack\n");
+				printf("Received same ACK frame, still waiting for new ack (%s:%d)\n", __FILE__, __LINE__);
 				netman->tx_state = WAITING_FOR_ACK;
 			}
 		}
@@ -77,15 +79,24 @@ void netman_rx_frame(netman_t * netman, of2g_frame_t frame)
 	else if (frametype == OF2G_DATA) 
 	{ 
 		netman->tx_state = NOT_WAITING_FOR_ACK; 
-		if(netman->current_rx_fid != of2g_get_fid(frame)) // received frame is different from last received
+		// Received frame is different from last received frame
+		if(netman->current_rx_fid != of2g_get_fid(frame)) // TODO: what if our last received frame was an ack with FID same as this data frame?
 		{
-			printf("Received new data frame\n");
+			printf("Received new data frame (%s:%d)\n", __FILE__, __LINE__);
 			netman->rx_state = NEW_DATA;
 			netman->current_rx_fid = of2g_get_fid(frame);
  			memcpy(&netman->current_rx_data, frame, sizeof(of2g_frame_t));
+			// Prepare ack frame to send based on received frame
+			build_ack_frame(netman,frame);
 		}
-		else 
-			netman->rx_state = DUP_DATA;
+		else // TODO: verify case if fids dont match
+		{
+			if(of2g_get_length(frame) == of2g_get_length(netman->current_rx_data)) // same fid, but different contents
+			{
+				netman->rx_state = DUP_DATA;
+				printf("Received duplicate data frame (%s:%d)\n", __FILE__, __LINE__);
+			}
+		}
 	}	
 	
 	else {

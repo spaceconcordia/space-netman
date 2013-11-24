@@ -16,19 +16,6 @@ class Netman_frame_Test : public ::testing::Test {
 	
 };
 
-// Verify that Ack is sent based on data we receive
-TEST_F(Netman_frame_Test, GoodAckFrameToSend) {
-	
-	memcpy(netman.current_rx_data, valid_dataframe, sizeof(of2g_frame_t));
-	build_ack_frame(&netman, netman.current_rx_data);
-	ASSERT_EQ(0x1, netman.current_tx_fid);
-
-	size_t i;
-	size_t frame_length = of2g_get_frame_length(expected_ackframe);
-	for(i = 0;i < frame_length; ++i)
-		ASSERT_EQ(expected_ackframe[i], netman.current_tx_ack[i]);
-}
-
 // Verify reception of data frame
 TEST_F(Netman_frame_Test, GoodDataFrameRead) { 
 	//  DATA: New data (ACK SENT?)
@@ -39,11 +26,26 @@ TEST_F(Netman_frame_Test, GoodDataFrameRead) {
 	size_t i;
 	for(i = 0;i < frame_length; ++i)
 		ASSERT_EQ(valid_dataframe[i], netman.current_rx_data[i]);
+	
+	// verify netman built the correct ack frame based on received dataframe
+	ASSERT_EQ(0x1, netman.current_tx_fid);
+	frame_length = of2g_get_frame_length(expected_ackframe);
+	for(i = 0; i < frame_length; ++i)
+		ASSERT_EQ(expected_ackframe[i], netman.current_tx_ack[i]);
+
+
+}
+
+// Verify duplicate data frames are handled correctly
+TEST_F(Netman_frame_Test, DupDataFrameRead) {
+	ASSERT_EQ(NOT_WAITING_FOR_ACK, netman.tx_state);
+	netman_rx_frame(&netman, valid_dataframe);
+	ASSERT_EQ(DUP_DATA, netman.rx_state);
+
 }
 
 // Check new data frame was built according to raw data and was stored correctly
 TEST_F(Netman_frame_Test, GoodDataFrameToSend) {
-	netman.current_tx_fid = 0x01; 
 	size_t length = 9;
 	netman_new_tx_bytes(&netman, buffer, length);
 	// verify tx_state and current_tx_data was set
@@ -74,7 +76,7 @@ TEST_F(Netman_frame_Test, GoodAckFrameRead) {
 
 // verify if were still waiting for a new ack when we don't get the expected ack
 TEST_F(Netman_frame_Test, DupAckFrameRead) {
-
+ // receives the same ack as the previously received ack
 	netman.tx_state = WAITING_FOR_ACK;
 	netman_rx_frame(&netman, expected_ackframe);
 	ASSERT_EQ(WAITING_FOR_ACK, netman.tx_state);

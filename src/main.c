@@ -45,7 +45,8 @@ void loop_until_session_established(netman_t * netman, Net2Com * net2com){
             of2g_get_frametype(frame) == OF2G_DATA
       ){
 
-         // transceiver_write(netman->current_tx_ack); // TODO - handle intial ACK and session starting!!!
+         netman_rx_frame(netman,frame); // this will set the netman state and process the received frame
+         transceiver_write(netman->current_tx_ack); // TODO - handle intial ACK and session starting!!!
          n_bytes = of2g_get_data_content(netman->current_rx_data, (unsigned char *)buffer);
          net2com->WriteToDataPipe(buffer, n_bytes);
 
@@ -65,7 +66,7 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
    timer_t window_timer = timer_get();
    timer_t resend_timer = timer_get();
 
-   // values in milliseconds
+   // values in seconds
    const uint32_t RESEND_TIMEOUT =      10;
    const uint32_t WINDOW_TIMEOUT = 15 * 60;
 
