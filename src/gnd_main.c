@@ -36,7 +36,7 @@ void loop_until_session_closed(netman_t * netman){
    timer_t window_timer = timer_get();
    timer_t resend_timer = timer_get();
 
-   // values in milliseconds
+   // values in seconds
    const uint32_t RESEND_TIMEOUT =      10;
    const uint32_t WINDOW_TIMEOUT = 15 * 60;
 
