@@ -33,6 +33,7 @@ TEST_F(Netman_of2g_Test, ValidFID) {
 TEST_F(Netman_of2g_Test, ValidACK) {
   // ACKID byte matches expected
   ASSERT_EQ(0x0, of2g_get_ackid(valid_dataframe));
+	ASSERT_EQ(0x1, of2g_get_ackid(expected_ackframe));
 }
 
 
@@ -40,11 +41,13 @@ TEST_F(Netman_of2g_Test, ValidACK) {
 TEST_F(Netman_of2g_Test, ValidDataLength) {
   // verify length byte
   ASSERT_EQ(9, of2g_get_length(valid_dataframe));
+  ASSERT_EQ(0, of2g_get_length(expected_ackframe));
 }
 
 TEST_F(Netman_of2g_Test, ValidFrameLength) {
 	// verify entire frame length, including header, data and checksum
   ASSERT_EQ(14, of2g_get_frame_length(valid_dataframe));
+  ASSERT_EQ(5, of2g_get_frame_length(expected_ackframe));
 }
 
 // Check for correct data frame

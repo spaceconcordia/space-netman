@@ -78,7 +78,7 @@ void netman_rx_frame(netman_t * netman, of2g_frame_t frame)
 	}
 	else if (frametype == OF2G_DATA) 
 	{ 
-		netman->tx_state = NOT_WAITING_FOR_ACK; 
+//		netman->tx_state = NOT_WAITING_FOR_ACK;  // TODO: verify this line
 		// Received frame is different from last received frame
 		if(netman->current_rx_fid != of2g_get_fid(frame)) // TODO: what if our last received frame was an ack with FID same as this data frame?
 		{
@@ -91,10 +91,15 @@ void netman_rx_frame(netman_t * netman, of2g_frame_t frame)
 		}
 		else // TODO: verify case if fids dont match
 		{
-			if(of2g_get_length(frame) == of2g_get_length(netman->current_rx_data)) // same fid, but different contents
+			if(of2g_get_length(frame) == of2g_get_length(netman->current_rx_data)) 
 			{
 				netman->rx_state = DUP_DATA;
 				printf("Received duplicate data frame (%s:%d)\n", __FILE__, __LINE__);
+			}
+			else
+			{
+				// fid of rx dataframe matches the last received dataframe
+				// but they dont have the same content
 			}
 		}
 	}	
