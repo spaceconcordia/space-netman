@@ -20,6 +20,15 @@ static NamedPipe herx(TRNSCVR_RX_PIPE);
 #error "TRNSCVR_RX_PIPE not #define'd!"
 #endif
 
+void transceiver_init(){
+   if(!initialized){
+      if (!hetx.Exist()) hetx.CreatePipe();
+      if (!herx.Exist()) herx.CreatePipe();
+      herx.ensure_open('r');
+      initialized = true;
+   }
+}
+
 // Read a new frame from the He transceiver. This function may block
 // briefly, but not indefinitely. TODO - timeout arg??
 //
@@ -27,21 +36,21 @@ static NamedPipe herx(TRNSCVR_RX_PIPE);
 // otherwise should return false.
 bool transceiver_read(of2g_frame_t frame){
 
-   if(!initialized){
-      if (!hetx.Exist()) hetx.CreatePipe();
-      if (!herx.Exist()) herx.CreatePipe();
-      herx.ensure_open('r');
-      initialized = true;
-   }
+   transceiver_init();
 
    uint8_t bytes_read = herx.ReadFromPipe((char *)OF2G_FRAME_2_BUFFER(frame), OF2G_BUFFER_SIZE);
 
    uint8_t frame_len  = of2g_get_frame_length(frame);
 
+
    if(bytes_read == 0){
       return false;
    }else{
       printf("Completed read of %d bytes, acquiring a %d byte long OF2G frame\n", bytes_read, frame_len);
+      for(int i = 0; i < frame_len; ++i){
+         printf("%02X ", OF2G_FRAME_2_BUFFER(frame)[i]);
+      }
+      printf("\n");
       return true;
    }
 
@@ -52,14 +61,16 @@ bool transceiver_read(of2g_frame_t frame){
 //
 void transceiver_write(of2g_frame_t frame){
 
-   if(!initialized){
-      if (!hetx.Exist()) hetx.CreatePipe();
-      if (!herx.Exist()) herx.CreatePipe();
-      herx.ensure_open('r');
-      initialized = true;
-   }
+   transceiver_init();
 
-   printf("TX'ing frame with length %d\n", of2g_get_frame_length(frame));
+   uint8_t frame_len  = of2g_get_frame_length(frame);
+
+   printf("TX'ing frame with length %d\n", frame_len);
+
+   for(int i = 0; i < frame_len; ++i){
+      printf("%02X ", OF2G_FRAME_2_BUFFER(frame)[i]);
+   }
+   printf("\n");
 
    hetx.WriteToPipe((char*)OF2G_FRAME_2_BUFFER(frame), of2g_get_frame_length(frame));
 

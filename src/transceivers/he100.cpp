@@ -40,6 +40,10 @@ bool initialize(){
    return true;
 }
 
+void transceiver_init(){
+   initialize();
+}
+
 // Read a new frame from the He transceiver. This function may block
 // briefly, but not indefinitely. TODO - timeout arg??
 //

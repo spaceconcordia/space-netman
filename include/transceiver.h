@@ -18,4 +18,7 @@ bool transceiver_read(of2g_frame_t frame);
 //
 void transceiver_write(of2g_frame_t frame);
 
+// Do any necessary initialization of the transceiver
+void transceiver_init();
+
 #endif
