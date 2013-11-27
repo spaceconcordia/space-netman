@@ -108,7 +108,7 @@ void loop_until_session_closed(netman_t * netman){
                   if(c >= ' ' && c <= '~'){
                      putchar(c);
                   }else{
-                     printf(" <%2X> ", c);
+                     printf(" 0x%02X ", c);
                   }
                }
 
