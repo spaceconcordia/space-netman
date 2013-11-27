@@ -4,14 +4,19 @@
 
 #include <timer.h>
 #include <Net2Com.h>
+#include <NamedPipe.h>
 
 #include "../include/netman.h"
 #include "../include/transceiver.h"
 
 void loop_until_session_closed(netman_t *);
 
+static NamedPipe gnd_input("gnd-input");
+
 int main()
 {
+
+   if(!gnd_input.Exist()) gnd_input.CreatePipe();
 
    netman_t netman;
    netman_init(&netman);
@@ -61,9 +66,10 @@ void loop_until_session_closed(netman_t * netman){
          // send it!
          assert(netman->tx_state == NOT_WAITING_FOR_ACK);
          // If we have any new data to send...
-         printf(">>> ");
-         if(0 < (n_bytes = scanf("%31s", buffer))){
-            buffer[n_bytes] = '\0';
+
+         n_bytes = gnd_input.ReadFromPipe(buffer, BUFFLEN);
+
+         if(0 < n_bytes){
             // ... then we send it!
             netman_new_tx_bytes(netman, (unsigned char *)buffer, n_bytes);
             printf("About to TX data over transceiver!!\n");
@@ -73,8 +79,6 @@ void loop_until_session_closed(netman_t * netman){
             // we've been waiting.
             printf("Starting resend timer at line %d\n", __LINE__);
             timer_start(&resend_timer, RESEND_TIMEOUT, 0);
-         }else{
-            printf("Got nothing.... :(\n");
          }
       }
 
