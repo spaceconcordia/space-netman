@@ -128,6 +128,15 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
                transceiver_write(netman->current_tx_ack);
                n_bytes = of2g_get_data_content(netman->current_rx_data, (unsigned char *)buffer);
                net2com->WriteToDataPipe(buffer, n_bytes);
+							 printf("Received Command: ");
+							 for(uint8_t i = 0; i < n_bytes; ++i){
+								   uint8_t c = buffer[i];
+									   if(c >= ' ' && c <= '~'){
+											      putchar(c);
+														  }else{
+																     printf(" 0x%02X ", c);
+																		   }
+							 }
                timer_start(&window_timer, WINDOW_TIMEOUT, 0);
                break;
             case DUP_DATA:

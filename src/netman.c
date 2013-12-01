@@ -64,7 +64,7 @@ void netman_rx_frame(netman_t * netman, of2g_frame_t frame)
 			// Received ack is not the same as the previously received ACK
 			if(rx_ackid != of2g_get_ackid(frame)) 
 			{
-				printf("Received new ACK frame (%s:%d)\n", __FILE__, __LINE__);
+				printf("Received new ACK frame with ackid %d (%s:%d)\n", of2g_get_ackid(frame), __FILE__, __LINE__);
 				netman->tx_state = NOT_WAITING_FOR_ACK;
 				netman->rx_state = NEW_ACK;
 		  	memcpy(&netman->current_rx_ack, frame, sizeof(of2g_frame_t));
@@ -82,7 +82,7 @@ void netman_rx_frame(netman_t * netman, of2g_frame_t frame)
 		// Received frame is different from last received frame
 		if(netman->current_rx_fid != of2g_get_fid(frame)) // TODO: what if our last received frame was an ack with FID same as this data frame?
 		{
-			printf("Received new data frame (%s:%d)\n", __FILE__, __LINE__);
+			printf("Received new data frame with FID %d (%s:%d)\n", of2g_get_fid(frame), __FILE__, __LINE__);
 			netman->rx_state = NEW_DATA;
 			netman->current_rx_fid = of2g_get_fid(frame);
  			memcpy(&netman->current_rx_data, frame, sizeof(of2g_frame_t));
@@ -94,7 +94,7 @@ void netman_rx_frame(netman_t * netman, of2g_frame_t frame)
 			if(of2g_get_length(frame) == of2g_get_length(netman->current_rx_data)) // same fid, but different contents
 			{
 				netman->rx_state = DUP_DATA;
-				printf("Received duplicate data frame (%s:%d)\n", __FILE__, __LINE__);
+				printf("Received duplicate data frame with FID %d  sending ACK again (%s:%d)\n", of2g_get_fid(frame), __FILE__, __LINE__);
 			}
 		}
 	}	

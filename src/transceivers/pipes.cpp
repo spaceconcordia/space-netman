@@ -65,7 +65,7 @@ void transceiver_write(of2g_frame_t frame){
 
    uint8_t frame_len  = of2g_get_frame_length(frame);
 
-   printf("TX'ing frame with length %d\n", frame_len);
+   printf("TX'ing frame with length %d and FID %d\n", frame_len, of2g_get_fid(frame));
 
    for(int i = 0; i < frame_len; ++i){
       printf("%02X ", OF2G_FRAME_2_BUFFER(frame)[i]);
