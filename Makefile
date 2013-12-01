@@ -5,9 +5,12 @@ OPT_LVL = 1
 # C Compiler
 CC      = g++
 CCFLAGS = -c -O$(OPT_LVL) $(WARNINGS)
-
+MICROCC=microblazeel-xilinx-linux-gnu-gcc
+MICROPP=microblazeel-xilinx-linux-gnu-g++
+MICROCFLAGS=-mcpu=v8.10.a -mxl-barrel-shift -mxl-multiply-high -mxl-pattern-compare -mno-xl-soft-mul -mno-xl-soft-div -mxl-float-sqrt -mhard-float -mxl-float-convert -ffixed-r31 --sysroot /usr/local/lib/mbgcc/microblaze-unknown-linux-gnu/sys-root -Wall
 # Linker
 LD      = g++
+MICROLD = $(MICROPP)
 LDFLAGS = -O$(OPT_LVL) $(WARNINGS) -lrt
 
 PROJ    = netman
@@ -19,9 +22,14 @@ LIBS     := Net2Com.a NamedPipe.a libtimer.a libhe100.a
 LIBS     := $(addprefix lib/, $(LIBS))
 INCFLAGS = -I./lib/include
 
+MICROLIBS     := Net2Com-mbcc.a NamedPipe-mbcc.a libtimer-mbcc.a libhe100-mbcc.a
+MICROLIBS     := $(addprefix lib/, $(LIBS))
+
 BIN_DIR = bin
 SAT_BIN_FILE= $(BIN_DIR)/sat
 GND_BIN_FILE= $(BIN_DIR)/gnd
+SAT_BIN_FILEQ6= $(BIN_DIR)/sat-mbcc
+GND_BIN_FILeQ6= $(BIN_DIR)/gnd-mbcc
 ALL_TRG = $(SAT_BIN_FILE) $(GND_BIN_FILE)
 
 # Generate exact dependencies using a smart method that I found online.
@@ -93,6 +101,12 @@ $(GND_BIN_FILE): $(SRCS:%.c=%.o) src/gnd_transceiver.o src/gnd_main.o $(LIBS) $(
 $(SAT_BIN_FILE): $(SRCS:%.c=%.o) src/sat_transceiver.o src/sat_main.o $(LIBS) $(BIN_DIR)
 	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
 
+$(GND_BIN_FILEQ6): $(SRCS:%.c=%.o) src/gnd_transceiver.o src/gnd_main.o $(MICROLIBS) $(BIN_DIR)
+	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
+
+# Our binary requires all our o files, and is fairly simple to make
+$(SAT_BIN_FILEQ6): $(SRCS:%.c=%.o) src/sat_transceiver.o src/sat_main.o $(MICROLIBS) $(BIN_DIR)
+	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
 namedpipe:
 	cd ../space-commander/                  \
 	&& make staticlibs.tar                 \
