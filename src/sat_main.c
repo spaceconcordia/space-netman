@@ -17,7 +17,7 @@ int main()
    netman_t netman;
    netman_init(&netman);
 
-   Net2Com net2com(PIPE_TWO, PIPE_ONE, PIPE_FOUR, PIPE_THREE);
+   Net2Com net2com(Dnet_w_com_r, Dcom_w_net_r, Inet_w_com_r, Icom_w_net_r);
 
    while(1){
 
