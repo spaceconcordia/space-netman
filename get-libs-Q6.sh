@@ -1,12 +1,12 @@
 mkdir -p bin
 mkdir -p lib/include
 echo 'Building HE-100 Library...\n'
-make he100PC
+make he100Q6
 echo 'Building timer library...\n'
-make timerPC
+make timerQ6
 echo 'Building pipes library...\n'
-make namedpipePC
+make namedpipeQ6
 echo 'Building commander...\n'
-make commanderPC
+make commanderQ6
 cd lib
 ls -al

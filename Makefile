@@ -128,22 +128,24 @@ namedpipeQ6:
 	&& rm staticlibs.tar                 \
 	&& cd ..
 
-#update HE-100 library and place in lib/
+# Builds libhe100.a
 he100PC:
 	cd ../HE100-lib/C/	\
 	&& sh x86-compile-lib-static-cpp.sh	\
 	&& make buildBinCpp	\
 	&& cp lib/libhe100-cpp.a ../../space-netman/lib	\
+	&& cp src/SC_he100.h ../../space-netman/lib/include	\
 	&& cd ../../space-netman/lib/	\
 	&& mv libhe100-cpp.a libhe100.a	
 
+#Builds libhe100-mbcc.a
 he100Q6:
 	cd ../HE100-lib/C/	\
 	&& sh mbcc-compile-lib-static-cpp.sh	\
 	&& make buildBinQ6	\
 	&& cp lib/libhe100-cpp.a ../../space-netman/lib	\
-	&& cd ../../space-netman/lib/	\
-	&& mv libhe100-cpp.a libhe100.a	
+	&& cp src/SC_he100.h ../../space-netman/lib/include	\
+	&& cd ../../space-netman/lib/
 
 # Get commander binaries in netman bin folder
 commanderPC:
@@ -159,9 +161,11 @@ commanderQ6:
 timerPC:
 	cd ../space-timer-lib	\
 	&& sh x86-compile-lib-static-cpp.sh	\
-	&& cp lib/libtimer.a ../space-netman/lib	
+	&& cp lib/libtimer.a ../space-netman/lib	\
+	&& cp inc/timer.h ../space-netman/lib/include
 
 timerQ6:
 	cd ../space-timer-lib	\
-	&& sh mbcc-compile-lib-static-cpp.sh	\
-	&& cp lib/libtimer.a ../space-netman/lib	
+	&& sh mbcc-compile-lib-static.sh	\
+	&& cp lib/libtimer-mbcc.a ../space-netman/lib	\	
+	&& cp inc/timer.h ../space-netman/lib/include
