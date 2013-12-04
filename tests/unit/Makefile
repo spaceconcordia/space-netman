@@ -75,9 +75,6 @@ netman.o : $(USER_DIR)/src/netman.c $(USER_DIR)/include/netman.h of2g.o
 of2g.o : $(USER_DIR)/src/of2g.c $(USER_DIR)/include/of2g.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/src/of2g.c
 
-#he100.o : $(USER_DIR)/src/he100.c $(USER_DIR)/include/SC_he100.h $(GTEST_HEADERS)
-#	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/src/he100.c
-
 netman-of2g-test.o : $(USER_DIR)/tests/unit/netman-of2g-test.cpp $(USER_DIR)/include/of2g.h  $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/tests/unit/netman-of2g-test.cpp
 
