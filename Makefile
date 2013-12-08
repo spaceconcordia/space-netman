@@ -17,7 +17,7 @@ PROJ    = netman
 SRCS    := netman.c of2g.c
 SRCS    := $(addprefix src/, $(SRCS))
 
-LIBS     := Net2Com.a NamedPipe.a libtimer.a libhe100.a
+LIBS     := Net2Com.a NamedPipe.a libhe100.a libtimer.a
 LIBS     := $(addprefix lib/, $(LIBS))
 INCFLAGS = -I./lib/include
 
@@ -27,6 +27,7 @@ MICROLIBS     := $(addprefix lib/, $(LIBS))
 BIN_DIR = bin
 SAT_BIN_FILE= $(BIN_DIR)/sat
 GND_BIN_FILE= $(BIN_DIR)/gnd
+VALVE_BIN_FILE = $(BIN_DIR)/valve
 SAT_BIN_FILEQ6= $(BIN_DIR)/sat-mbcc
 GND_BIN_FILEQ6= $(BIN_DIR)/gnd-mbcc
 ALL_TRG = $(SAT_BIN_FILE) $(GND_BIN_FILE)
@@ -79,12 +80,14 @@ src/sat_transceiver.o: src/transceiver.c $(DEP_DIR)
 	$(CC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="sat-out-gnd-in"' \
 	                  -D'TRNSCVR_RX_PIPE="gnd-out-sat-in"' \
 							-D'USE_PIPE_TRNSCVR' \
+							-D'VALVE_TX_PIPE="sat_valve"' \
 							$(CCFLAGS) $< -o $@
 
 src/gnd_transceiver.o: src/transceiver.c $(DEP_DIR)
 	$(CC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="gnd-out-sat-in"' \
 	                  -D'TRNSCVR_RX_PIPE="sat-out-gnd-in"' \
 							-D'USE_PIPE_TRNSCVR' \
+							-D'VALVE_TX_PIPE="gnd_valve"' \
 							$(CCFLAGS) $< -o $@
 
 # For each c file, we compile it to an o file, and then make a

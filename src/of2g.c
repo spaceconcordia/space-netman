@@ -1,7 +1,7 @@
 #include <SC_he100.h>
 #include "../include/of2g.h"
 
-unsigned char g_ackFID = 0x01;
+unsigned char g_ackFID = 0x21;
 
 // This function should inspect the given of2g frame and return
 // a bool indicating whether it is valid. At a minimum this should
@@ -119,8 +119,8 @@ bool of2g_build_data_frame(unsigned char * buffer, size_t length, unsigned char 
 bool of2g_build_ack_frame(of2g_frame_t data_frame, of2g_frame_t out)
 {
 	OF2G_FRAME_2_BUFFER(out)[0] = g_ackFID; // FID of the ack frame 
-	if(g_ackFID == 255)
-		g_ackFID = 0x00;
+	if(g_ackFID == 126)
+		g_ackFID = 0x20;
 
 	g_ackFID += 1;
 

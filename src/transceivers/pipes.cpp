@@ -20,6 +20,12 @@ static NamedPipe herx(TRNSCVR_RX_PIPE);
 #error "TRNSCVR_RX_PIPE not #define'd!"
 #endif
 
+#ifdef VALVE_TX_PIPE
+static NamedPipe valve(VALVE_TX_PIPE);
+#else
+#error "VALVE_TX_PIPE not #define'd!"
+#endif
+
 void transceiver_init(){
    if(!initialized){
       if (!hetx.Exist()) hetx.CreatePipe();
@@ -65,13 +71,16 @@ void transceiver_write(of2g_frame_t frame){
 
    uint8_t frame_len  = of2g_get_frame_length(frame);
 
-   printf("TX'ing frame with length %d and FID %d\n", frame_len, of2g_get_fid(frame));
+   printf("TX'ing frame with length %d and FID %02X\n", frame_len, of2g_get_fid(frame));
 
    for(int i = 0; i < frame_len; ++i){
       printf("%02X ", OF2G_FRAME_2_BUFFER(frame)[i]);
    }
    printf("\n");
 
-   hetx.WriteToPipe((char*)OF2G_FRAME_2_BUFFER(frame), of2g_get_frame_length(frame));
+	 if(valve.Exist())
+		 valve.WriteToPipe((char*)OF2G_FRAME_2_BUFFER(frame), of2g_get_frame_length(frame));
+	 else
+		 hetx.WriteToPipe((char*)OF2G_FRAME_2_BUFFER(frame), of2g_get_frame_length(frame));
 
 }

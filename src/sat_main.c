@@ -115,13 +115,13 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
          // action.
          switch(netman->rx_state){
             case NEW_ACK:
-               printf("  NEW_ACK, restarting window (%s:%d)\n", __FILE__, __LINE__);
+               printf("  NEW_ACK with ackid = %02X, restarting window (%s:%d)\n", of2g_get_ackid(frame), __FILE__, __LINE__);
                // We don't need to do anything other than keep
                // the window open.
                timer_start(&window_timer, WINDOW_TIMEOUT, 0);
                break;
             case NEW_DATA:
-               printf("  NEW_DATA, sending ACK, writing commander pipe (%s:%d)\n", __FILE__, __LINE__);
+               printf("  NEW_DATA with fid = %02X, sending ACK, writing commander pipe (%s:%d)\n", of2g_get_fid(frame), __FILE__, __LINE__);
                // We need to acknowledge that we received the data
                // ok, send the data to the commander, and finally
                // we need to make sure the window stays open.

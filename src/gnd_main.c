@@ -92,13 +92,13 @@ void loop_until_session_closed(netman_t * netman){
          // action.
          switch(netman->rx_state){
             case NEW_ACK:
-               printf("  NEW_ACK, restarting window (%s:%d)\n", __FILE__, __LINE__);
+               printf("  NEW_ACK with ackid = %02X, restarting window (%s:%d)\n", of2g_get_ackid(frame), __FILE__, __LINE__);
                // We don't need to do anything other than keep
                // the window open.
                timer_start(&window_timer, WINDOW_TIMEOUT, 0);
                break;
             case NEW_DATA:
-               printf("  NEW_DATA, sending ACK, writing commander pipe (%s:%d)\n", __FILE__, __LINE__);
+               printf("  NEW_DATA with fid = %02X, sending ACK (%s:%d)\n", of2g_get_fid(frame), __FILE__, __LINE__);
                // We need to acknowledge that we received the data
                // ok, send the data to the commander, and finally
                // we need to make sure the window stays open.
@@ -106,7 +106,7 @@ void loop_until_session_closed(netman_t * netman){
                transceiver_write(netman->current_tx_ack);
                printf("    done\n");
                n_bytes = of2g_get_data_content(netman->current_rx_data, (unsigned char *)buffer);
-
+							 printf(" Data received from satellite: ");
                for(uint8_t i = 0; i < n_bytes; ++i){
                   uint8_t c = buffer[i];
                   if(c >= ' ' && c <= '~'){
