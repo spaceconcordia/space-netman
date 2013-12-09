@@ -60,7 +60,8 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
    const size_t BUFFLEN = 256;
    char buffer[BUFFLEN]; // TODO - exact max size
    size_t n_bytes;
-
+   unsigned char end_command = 0xFF;
+   unsigned char one = 0x01;
    of2g_frame_t frame;
 
    timer_t window_timer = timer_get();
@@ -127,16 +128,22 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
                // we need to make sure the window stays open.
                transceiver_write(netman->current_tx_ack);
                n_bytes = of2g_get_data_content(netman->current_rx_data, (unsigned char *)buffer);
-               net2com->WriteToDataPipe(buffer, n_bytes);
-							 printf("Received Command: ");
-							 for(uint8_t i = 0; i < n_bytes; ++i){
-								   uint8_t c = buffer[i];
-									   if(c >= ' ' && c <= '~'){
-											      putchar(c);
-														  }else{
-																     printf(" 0x%02X ", c);
-																		   }
-							 }
+		printf("n_bytes = '%d'", n_bytes);
+		printf("Buffer = '%s'", buffer);	
+               net2com->WriteToDataPipe(buffer[0], 1);
+    	       printf("Received Command: ");
+		for(uint8_t i = 0; i < n_bytes; ++i){
+		   uint8_t c = buffer[i];
+		   if(c >= ' ' && c <= '~'){
+			putchar(c);
+			} else {
+				printf(" 0x%02X ", c);
+			}
+		}
+
+	       net2com->WriteToInfoPipe(one);
+	       net2com->WriteToInfoPipe(end_command); 
+	       printf("Wrote to info pipe: %02X\n", end_command);
                timer_start(&window_timer, WINDOW_TIMEOUT, 0);
                break;
             case DUP_DATA:

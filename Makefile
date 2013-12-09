@@ -115,20 +115,24 @@ $(SAT_BIN_FILE): $(SRCS:%.c=%.o) src/sat_transceiver.o src/sat_main.o $(LIBS) $(
 #	$(CC) $(INCFLAGS) $(CCFLAGS) $< -o $@
 #	@$(MAKE_DEPEND)
 
+
+of2gQ6.o : src/of2g.c $(DEP_DIR)
+	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -o $@
+
+netmanQ6.o : src/netman.c $(DEP_DIR)
+	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -o $@
+
+# gnd_mainQ6.o :
+
+sat_mainQ6.o : src/of2g.c src/netman.c src/sat_main.c
+	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -o $@
+
 src/sat_transceiverQ6.o: src/transceiver.c $(DEP_DIR)
-	$(MICROCC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="sat-out-gnd-in"' \
-	                  -D'TRNSCVR_RX_PIPE="gnd-out-sat-in"' \
-							$(MICROCFLAGS) $< -o $@
+	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -o $@
 
-src/gnd_transceiverQ6.o: src/transceiver.c $(DEP_DIR)
-	$(MICROCC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="gnd-out-sat-in"' \
-	                  -D'TRNSCVR_RX_PIPE="sat-out-gnd-in"' \
-							$(MICROCFLAGS) $< -o $@
+#$(GND_BIN_FILEQ6): src/of2g.o src/netman.o src/gnd_transceiverQ6.o src/gnd_mainQ6.o $(MICROLIBS) $(BIN_DIR)
+#	$(MICROLD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
 
-$(GND_BIN_FILEQ6): $(SRCS:%.c=%.o) src/gnd_transceiverQ6.o src/gnd_mainQ6.o $(MICROLIBS) $(BIN_DIR)
-	$(MICROLD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
-
-# Our binary requires all our o files, and is fairly simple to make
 $(SAT_BIN_FILEQ6): $(SRCS:%.c=%.o) src/sat_transceiverQ6.o src/sat_mainQ6.o $(MICROLIBS) $(BIN_DIR)
 	$(MICROLD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
 
