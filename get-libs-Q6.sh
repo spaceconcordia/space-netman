@@ -36,8 +36,9 @@ cp bin/space-commanderQ6 $NETMAN_DIR/bin
 make staticlibsQ6.tar
 cp staticlibsQ6.tar $NETMAN_DIR/lib
 cd $NETMAN_DIR/lib
+echo 'Extracting NamedPipes and Net2Com library'
 tar -xf staticlibsQ6.tar
 rm staticlibsQ6.tar
 
-cd $(NETMAN_DIR)/lib
+cd $NETMAN_DIR/lib
 ls | grep 'mbcc*'

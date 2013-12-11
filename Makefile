@@ -22,7 +22,7 @@ LIBS     := $(addprefix lib/, $(LIBS))
 INCFLAGS = -I./lib/include
 
 MICROLIBS     := Net2Com-mbcc.a NamedPipe-mbcc.a libtimer-mbcc.a libhe100-mbcc.a
-MICROLIBS     := $(addprefix lib/, $(LIBS))
+MICROLIBS     := $(addprefix lib/, $(MICROLIBS))
 
 BIN_DIR = bin
 SAT_BIN_FILE= $(BIN_DIR)/sat
@@ -31,7 +31,7 @@ VALVE_BIN_FILE = $(BIN_DIR)/valve
 SAT_BIN_FILEQ6= $(BIN_DIR)/sat-mbcc
 GND_BIN_FILEQ6= $(BIN_DIR)/gnd-mbcc
 ALL_TRG = $(SAT_BIN_FILE) $(GND_BIN_FILE)
-ALL_TRGQ6 = $(SAT_BIN_FILEQ6) $(GND_BIN_FILEQ6)
+ALL_TRGQ6 = $(SAT_BIN_FILEQ6) $(GND_BIN_FILEQ6) 
 # Generate exact dependencies using a smart method that I found online.
 #
 # The basic idea is that we don't need to know the dependencies until
@@ -116,23 +116,35 @@ $(SAT_BIN_FILE): $(SRCS:%.c=%.o) src/sat_transceiver.o src/sat_main.o $(LIBS) $(
 #	@$(MAKE_DEPEND)
 
 
-of2gQ6.o : src/of2g.c $(DEP_DIR)
-	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -o $@
+src/of2gQ6.o : src/of2g.c 
+	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -c -o src/of2gQ6.o 
 
-netmanQ6.o : src/netman.c $(DEP_DIR)
-	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -o $@
+src/netmanQ6.o : src/netman.c 
+	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -c -o src/netmanQ6.o
 
-# gnd_mainQ6.o :
+src/gnd_transceiverQ6.o : src/transceiver.c
+	$(MICROCC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="gnd-out-sat-in"' \
+	                  -D'TRNSCVR_RX_PIPE="sat-out-gnd-in"' \
+							-D'USE_PIPE_TRNSCVR' \
+							-D'VALVE_TX_PIPE="gnd_valve"' \
+$(MICROCCFLAGS) $< -c -o src/gnd_transceiverQ6.o
 
-sat_mainQ6.o : src/of2g.c src/netman.c src/sat_main.c
-	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -o $@
+src/gnd_mainQ6.o : src/gnd_main.c src/gnd_transceiverQ6.o
+	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -c -o src/gnd_mainQ6.o
 
-src/sat_transceiverQ6.o: src/transceiver.c $(DEP_DIR)
-	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -o $@
+src/sat_mainQ6.o : src/sat_main.c src/sat_transceiverQ6.o
+	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -c -o src/sat_mainQ6.o
 
-#$(GND_BIN_FILEQ6): src/of2g.o src/netman.o src/gnd_transceiverQ6.o src/gnd_mainQ6.o $(MICROLIBS) $(BIN_DIR)
-#	$(MICROLD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
+src/sat_transceiverQ6.o: src/transceiver.c 
+	$(MICROCC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="sat-out-gnd-in"' \
+	                  -D'TRNSCVR_RX_PIPE="gnd-out-sat-in"' \
+							-D'USE_PIPE_TRNSCVR' \
+							-D'VALVE_TX_PIPE="sat_valve"' \
+$(MICROCCFLAGS) $< -c -o src/sat_transceiverQ6.o
 
-$(SAT_BIN_FILEQ6): $(SRCS:%.c=%.o) src/sat_transceiverQ6.o src/sat_mainQ6.o $(MICROLIBS) $(BIN_DIR)
+$(GND_BIN_FILEQ6): src/of2gQ6.o src/netmanQ6.o src/gnd_transceiverQ6.o src/gnd_mainQ6.o $(MICROLIBS) $(BIN_DIR)
+	$(MICROLD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
+
+$(SAT_BIN_FILEQ6): src/of2gQ6.o src/netmanQ6.o src/sat_transceiverQ6.o src/sat_mainQ6.o $(MICROLIBS) $(BIN_DIR)
 	$(MICROLD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
 

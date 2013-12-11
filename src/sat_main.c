@@ -61,7 +61,7 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
    char buffer[BUFFLEN]; // TODO - exact max size
    size_t n_bytes;
    unsigned char end_command = 0xFF;
-   unsigned char one = 0x01;
+   unsigned char infopipe_bytes = 0x01;
    of2g_frame_t frame;
 
    timer_t window_timer = timer_get();
@@ -130,7 +130,7 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
                n_bytes = of2g_get_data_content(netman->current_rx_data, (unsigned char *)buffer);
 		printf("n_bytes = '%d'", n_bytes);
 		printf("Buffer = '%s'", buffer);	
-               net2com->WriteToDataPipe(buffer[0], 1);
+               net2com->WriteToDataPipe(buffer, n_bytes);
     	       printf("Received Command: ");
 		for(uint8_t i = 0; i < n_bytes; ++i){
 		   uint8_t c = buffer[i];
@@ -141,7 +141,7 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
 			}
 		}
 
-	       net2com->WriteToInfoPipe(one);
+	       net2com->WriteToInfoPipe(infopipe_bytes);
 	       net2com->WriteToInfoPipe(end_command); 
 	       printf("Wrote to info pipe: %02X\n", end_command);
                timer_start(&window_timer, WINDOW_TIMEOUT, 0);
