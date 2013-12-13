@@ -106,7 +106,7 @@ void loop_until_session_closed(netman_t * netman){
                transceiver_write(netman->current_tx_ack);
                printf("    done\n");
                n_bytes = of2g_get_data_content(netman->current_rx_data, (unsigned char *)buffer);
-							 printf(" Data received from satellite: ");
+							 printf(" Data received from satellite with num of bytes %d: ", n_bytes);
                for(uint8_t i = 0; i < n_bytes; ++i){
                   uint8_t c = buffer[i];
                   if(c >= ' ' && c <= '~'){
