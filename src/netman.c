@@ -46,12 +46,6 @@ void build_ack_frame (netman_t * netman, of2g_frame_t data_frame)
 // of `netman` and updating `current_*x_*` members appropriately
 void netman_rx_frame(netman_t * netman, of2g_frame_t frame)
 {
-	if(!of2g_valid_frame(frame))
-		netman->rx_state = BAD_CSUM;
-
-	// FID cannot be 0, otherwise the ackid of it would be 0
-	if(of2g_get_fid(frame) == 0x0)
-		netman->rx_state = BAD_FID;	
 
 	of2g_frametype_t frametype = of2g_get_frametype(frame);
 	if (frametype == OF2G_ACK) 
@@ -102,4 +96,10 @@ void netman_rx_frame(netman_t * netman, of2g_frame_t frame)
 	else {
 		// wasn't data or ack frame
 	}
+	if(!of2g_valid_frame(frame))
+		netman->rx_state = BAD_CSUM;
+
+	// FID cannot be 0, otherwise the ackid of it would be 0
+	if(of2g_get_fid(frame) == 0x0)
+		netman->rx_state = BAD_FID;	
 }

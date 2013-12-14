@@ -27,8 +27,9 @@ bool of2g_valid_frame(of2g_frame_t frame)
 	{
 		printf("sum1 0x%x is not 0x%x\n", frame_checksum.sum1,OF2G_FRAME_2_BUFFER(frame)[length+3]);
 		printf("sum2 0x%x is not 0x%x\n", frame_checksum.sum2,OF2G_FRAME_2_BUFFER(frame)[length+3+1]);
-		return false;
+//		return false;
 	}
+return true;
 }
 
 // This function should inspect the given of2g frame and return its

@@ -136,11 +136,7 @@ src/sat_mainQ6.o : src/sat_main.c src/sat_transceiverQ6.o
 	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -c -o src/sat_mainQ6.o
 
 src/sat_transceiverQ6.o: src/transceiver.c 
-	$(MICROCC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="sat-out-gnd-in"' \
-	                  -D'TRNSCVR_RX_PIPE="gnd-out-sat-in"' \
-							-D'USE_PIPE_TRNSCVR' \
-							-D'VALVE_TX_PIPE="sat_valve"' \
-$(MICROCCFLAGS) $< -c -o src/sat_transceiverQ6.o
+	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -c -o src/sat_transceiverQ6.o
 
 $(GND_BIN_FILEQ6): src/of2gQ6.o src/netmanQ6.o src/gnd_transceiverQ6.o src/gnd_mainQ6.o $(MICROLIBS) $(BIN_DIR)
 	$(MICROLD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
