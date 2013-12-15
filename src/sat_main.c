@@ -93,7 +93,7 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
          assert(netman->tx_state == NOT_WAITING_FOR_ACK);
          // If we have any new data to send...
          if(0 < (n_bytes = net2com->ReadFromDataPipe(buffer, BUFFLEN))){
-            printf("Read and got data from commander!!\n");
+            printf("Read from commander data pipe\n");
             // ... then we send it!
             netman_new_tx_bytes(netman, (unsigned char *)buffer, n_bytes);
             printf("About to TX data over transceiver!!\n");
@@ -103,6 +103,18 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
             // we've been waiting.
             printf("Starting resend timer at line %d\n", __LINE__);
             timer_start(&resend_timer, RESEND_TIMEOUT, 0);
+         }
+         else if(0 < (n_bytes = net2com->ReadFromInfoPipe(buffer, BUFFLEN))){
+            // Read from info pipe
+            printf("Read from commander infopipe\n");
+            netman_new_tx_bytes(netman, (unsigned char *)buffer, n_bytes);
+            printf("About to TX data over transceiver!!\n");
+            transceiver_write(netman->current_tx_data);
+            printf("Done TX data over transceiver!!\n");
+
+            printf("Starting resend timer at line %d\n", __LINE__);
+            timer_start(&resend_timer, RESEND_TIMEOUT, 0);
+            
          }
       }
 
