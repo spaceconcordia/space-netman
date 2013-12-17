@@ -68,30 +68,32 @@ bool transceiver_read(of2g_frame_t frame){
 
    // TODO - check EOF condition also and deal with it
 
-    // Read 15 garbage
+    // Read 14 garbage
     // discard
     // read 3
     // check length
     // read length more
-    // read 4 ending garbe
+    // read 4 ending garbage bytes + endline
 
     // read garbage bytes first
     size_t bytes = datapipe.ReadFromPipe((char*)frame, 14);
 
    // read the first 3 bytes, these are always all there, and contain the
    // length field.
-   if(3 != datapipe.ReadFromPipe((char *)OF2G_FRAME_2_BUFFER(frame), 3)) 
+   if(6 != datapipe.ReadFromPipe((char *)OF2G_FRAME_2_BUFFER(frame), 6)) 
    {
       printf("Could not get first 3 bytes for length\n");
       return false;
    }
 
-    unsigned char cc = ((unsigned char*)frame)[2];
-    printf("length byte: %c\n", cc);
+    (char *)OF2G_FRAME_2_BUFFER(frame);
+    unsigned char res[3];
+    hex_decode((char *)OF2G_FRAME_2_BUFFER(frame),6,res);
+    printf("length byte: %d\n", res[2]);
 
     printf("Read first 3 bytes:\n");
     for(size_t i = 0; i < 3; ++i){
-       unsigned char c = ((unsigned char*)frame)[i];
+       unsigned char c = res[i]; 
        if(c >= ' ' && c <= '~'){
             putchar(c);
         } else {
@@ -102,7 +104,8 @@ bool transceiver_read(of2g_frame_t frame){
 
    // Now we get the total length of the frame, so we know how many more
    // bytes to read.
-   size_t bytes_to_read = frame[2] + 2;
+   size_t bytes_to_read = res[2] + 2;
+   bytes_to_read = bytes_to_read * 2;
    printf("bytes to read after length byte: %d!\n", (int)bytes_to_read);
    // We read the entire rest of the frame
    if(bytes_to_read !=
@@ -113,7 +116,9 @@ bool transceiver_read(of2g_frame_t frame){
    }
     // Dump garbage bytes after our frame
     datapipe.ReadFromPipe(garbage, 5);
-
+    size_t frame_length = of2g_get_frame_length(frame);
+    printf("total frame length = %d\n", frame_length);
+    //fo
    return true;
 
 }

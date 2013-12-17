@@ -142,6 +142,9 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
                n_bytes = of2g_get_data_content(netman->current_rx_data, (unsigned char *)buffer);
 		printf("n_bytes = '%d'\n" , n_bytes);
 //		printf("Buffer = '%s' ", buffer);	
+
+	       net2com->WriteToInfoPipe(infopipe_bytes);
+	       printf("\nWrote to info pipe: 0x%02X\n", infopipe_bytes);
                net2com->WriteToDataPipe(buffer, n_bytes);
     	       printf("Received Comand: ");
 		for(uint8_t i = 0; i < n_bytes; ++i){
@@ -153,10 +156,8 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
 			}
 		}
 
-	       net2com->WriteToInfoPipe(infopipe_bytes);
-	       printf("\nWrote to info pipe: 0x%02X\n", infopipe_bytes);
 	       net2com->WriteToInfoPipe(end_command); 
-	       printf("Wrote to info pipe: 0x%02X\n", end_command);
+	       printf("\nWrote to info pipe: 0x%02X\n", end_command);
                timer_start(&window_timer, WINDOW_TIMEOUT, 0);
                break;
             case DUP_DATA:
