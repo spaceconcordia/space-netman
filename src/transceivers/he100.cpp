@@ -86,7 +86,6 @@ bool transceiver_read(of2g_frame_t frame){
       return false;
    }
 
-    (char *)OF2G_FRAME_2_BUFFER(frame);
     unsigned char res[3];
     hex_decode((char *)OF2G_FRAME_2_BUFFER(frame),6,res);
     printf("length byte: %d\n", res[2]);
@@ -109,14 +108,19 @@ bool transceiver_read(of2g_frame_t frame){
    printf("bytes to read after length byte: %d!\n", (int)bytes_to_read);
    // We read the entire rest of the frame
    if(bytes_to_read !=
-           datapipe.ReadFromPipe((char *)OF2G_FRAME_2_BUFFER(frame) + 3, bytes_to_read))
+           datapipe.ReadFromPipe((char *)OF2G_FRAME_2_BUFFER(frame) + 6, bytes_to_read))
    {
       printf("Can't read rest of frame\n");
       return false;
    }
     // Dump garbage bytes after our frame
     datapipe.ReadFromPipe(garbage, 5);
-    size_t frame_length = of2g_get_frame_length(frame);
+    // Convert full ASCII frame to HEX
+    size_t frame_length = bytes_to_read + 6;
+    of2g_frame_t tmp_frame;
+    hex_decode((char *)OF2G_FRAME_2_BUFFER(frame),frame_length,tmp_frame);
+    frame = tmp_frame;
+
     printf("total frame length = %d\n", frame_length);
     //fo
    return true;
