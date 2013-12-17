@@ -59,6 +59,8 @@ void transceiver_init(){
 // otherwise should return false.
 bool transceiver_read(of2g_frame_t frame){
    char garbage[5];
+   of2g_frame_t tmp_frame;
+
    if(!initialized){
       initialized = initialize();
    }
@@ -76,18 +78,18 @@ bool transceiver_read(of2g_frame_t frame){
     // read 4 ending garbage bytes + endline
 
     // read garbage bytes first
-    size_t bytes = datapipe.ReadFromPipe((char*)frame, 14);
+    size_t bytes = datapipe.ReadFromPipe((char*)tmp_frame, 14);
 
    // read the first 3 bytes, these are always all there, and contain the
    // length field.
-   if(6 != datapipe.ReadFromPipe((char *)OF2G_FRAME_2_BUFFER(frame), 6)) 
+   if(6 != datapipe.ReadFromPipe((char *)OF2G_FRAME_2_BUFFER(tmp_frame), 6)) 
    {
       printf("Could not get first 3 bytes for length\n");
       return false;
    }
 
     unsigned char res[3];
-    hex_decode((char *)OF2G_FRAME_2_BUFFER(frame),6,res);
+    hex_decode((char *)OF2G_FRAME_2_BUFFER(tmp_frame),6,res);
     printf("length byte: %d\n", res[2]);
 
     printf("Read first 3 bytes:\n");
@@ -108,7 +110,7 @@ bool transceiver_read(of2g_frame_t frame){
    printf("bytes to read after length byte: %d!\n", (int)bytes_to_read);
    // We read the entire rest of the frame
    if(bytes_to_read !=
-           datapipe.ReadFromPipe((char *)OF2G_FRAME_2_BUFFER(frame) + 6, bytes_to_read))
+           datapipe.ReadFromPipe((char *)OF2G_FRAME_2_BUFFER(tmp_frame) + 6, bytes_to_read))
    {
       printf("Can't read rest of frame\n");
       return false;
@@ -117,13 +119,10 @@ bool transceiver_read(of2g_frame_t frame){
     datapipe.ReadFromPipe(garbage, 5);
     // Convert full ASCII frame to HEX
     size_t frame_length = bytes_to_read + 6;
-    of2g_frame_t tmp_frame;
-    hex_decode((char *)OF2G_FRAME_2_BUFFER(frame),frame_length,tmp_frame);
-    frame = tmp_frame;
+    hex_decode((char *)OF2G_FRAME_2_BUFFER(tmp_frame),frame_length,(char*)OF2G_FRAME_2_BUFFER(frame));
 
-    printf("total frame length = %d\n", frame_length);
-    //fo
-   return true;
+    printf("total frame length = %d\n", of2g_get_frame_length(frame));
+    return true;
 
 }
 
