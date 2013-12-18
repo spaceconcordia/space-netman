@@ -140,7 +140,7 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
                // we need to make sure the window stays open.
                transceiver_write(netman->current_tx_ack);
                n_bytes = of2g_get_data_content(netman->current_rx_data, (unsigned char *)buffer);
-		printf("n_bytes = '%d'\n" , n_bytes);
+		printf("n_bytes = '%zu'\n" , n_bytes);
 //		printf("Buffer = '%s' ", buffer);	
 
 	       net2com->WriteToInfoPipe(infopipe_bytes);

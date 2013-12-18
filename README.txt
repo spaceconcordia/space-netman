@@ -69,6 +69,13 @@ On Q6:
 ======
 
 Copy sat-mbcc to Q6
+Make directory for helium pipe:
+  mkdir -p /var/log/he100/
+
+Get latest version of space-script
+run
+  sh build-apps-folder.sh
+
 run
   ./sat-mbcc
 
@@ -81,6 +88,3 @@ Example of input on the Kenwood Putty terminal:
 The satellite netman will receive the frame in ascii, and convert to hex.
 The frame will be converted on the netman as:
 0x01 0x00 0x03 0xc5 0x3f 0x2a 0x5a
-
-
-

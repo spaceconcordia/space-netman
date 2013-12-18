@@ -8,7 +8,6 @@
 #include "../../include/of2g.h"
 
 static bool initialized = false;
-static FILE * he100_pipe;
 static int    he100_fd;
 static NamedPipe datapipe("/var/log/he100/data.log");
 
@@ -78,7 +77,7 @@ bool transceiver_read(of2g_frame_t frame){
     // read 4 ending garbage bytes + endline
 
     // read garbage bytes first
-    size_t bytes = datapipe.ReadFromPipe((char*)tmp_frame, 14);
+    datapipe.ReadFromPipe((char*)tmp_frame, 14);
 
    // read the first 3 bytes, these are always all there, and contain the
    // length field.
@@ -119,9 +118,9 @@ bool transceiver_read(of2g_frame_t frame){
     datapipe.ReadFromPipe(garbage, 5);
     // Convert full ASCII frame to HEX
     size_t frame_length = bytes_to_read + 6;
-    hex_decode((char *)OF2G_FRAME_2_BUFFER(tmp_frame),frame_length,(char*)OF2G_FRAME_2_BUFFER(frame));
+    hex_decode((char *)OF2G_FRAME_2_BUFFER(tmp_frame),frame_length,(unsigned char*)OF2G_FRAME_2_BUFFER(frame));
 
-    printf("total frame length = %d\n", of2g_get_frame_length(frame));
+    printf("total frame length = %zu\n", of2g_get_frame_length(frame));
     return true;
 
 }
