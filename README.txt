@@ -3,10 +3,9 @@ To compile, the `lib` directory should be made by hand:
    mkdir -p lib/include
 
 Then take the most up to date versions of:
-   NamedPipe
-   Net2Com
-   timer
-   he100
+   space-commander
+   space-timer-lib
+   HE100-lib (namedpipes branch)
 
 Run the scripts (Q6 or PC) for all static libraries needed:
 sh get-libs-Q6.sh
@@ -47,6 +46,7 @@ Example Use:
 
 =====================================================================
 Simulation of ground station with satellite netman & commander on PC:
+                     Testing get-time command
 =====================================================================
 
 Open 4 terminals:
@@ -62,7 +62,7 @@ Command Step 1
 echo -n -e \\x31 > gnd-input
 
 Command Step 2
-echo -n -e \\x21 > gnd-input 
+echo -n -e \\x21 > gnd-input
 
 ======
 On Q6:
@@ -79,11 +79,8 @@ Example of input on the Kenwood Putty terminal:
 010003c53f2a5a
 
 The satellite netman will receive the frame in ascii, and convert to hex.
-The frame will be converted on the netman as: 
+The frame will be converted on the netman as:
 0x01 0x00 0x03 0xc5 0x3f 0x2a 0x5a
-
-
-
 
 
 
