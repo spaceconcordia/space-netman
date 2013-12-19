@@ -31,7 +31,7 @@ bool initialize(){
 
 
 unsigned char*
-hex_decode(const char *in, size_t len,unsigned char *out)
+hex_decode(unsigned char *in, size_t len,unsigned char *out)
 {
     unsigned int i, t, hn, ln;
 
@@ -64,7 +64,7 @@ bool transceiver_read(of2g_frame_t frame){
       initialized = initialize();
    }
 
-   printf("About to fread he100_pipe (%s:%d)\n", __FILE__, __LINE__);
+   printf("Reading from transceiver... (%s:%d)\n", __FILE__, __LINE__);
    HE100_read(he100_fd, 5);
 
    // TODO - check EOF condition also and deal with it
@@ -88,17 +88,13 @@ bool transceiver_read(of2g_frame_t frame){
    }
 
     unsigned char res[3];
-    hex_decode((char *)OF2G_FRAME_2_BUFFER(tmp_frame),6,res);
+    hex_decode((unsigned char *)OF2G_FRAME_2_BUFFER(tmp_frame),6,res);
     printf("length byte: %d\n", res[2]);
 
     printf("Read first 3 bytes:\n");
     for(size_t i = 0; i < 3; ++i){
        unsigned char c = res[i]; 
-       if(c >= ' ' && c <= '~'){
-            putchar(c);
-        } else {
             printf(" 0x%02X ", c);
-        }
     }
     putchar('\n');
 
@@ -118,9 +114,24 @@ bool transceiver_read(of2g_frame_t frame){
     datapipe.ReadFromPipe(garbage, 5);
     // Convert full ASCII frame to HEX
     size_t frame_length = bytes_to_read + 6;
-    hex_decode((char *)OF2G_FRAME_2_BUFFER(tmp_frame),frame_length,(unsigned char*)OF2G_FRAME_2_BUFFER(frame));
+    hex_decode((unsigned char *)OF2G_FRAME_2_BUFFER(tmp_frame),frame_length+1,(unsigned char*)OF2G_FRAME_2_BUFFER(frame));
 
     printf("total frame length = %zu\n", of2g_get_frame_length(frame));
+    printf("Unconverted frame: \n");
+    for(size_t i = 0; i < frame_length; ++i){
+       unsigned char c = OF2G_FRAME_2_BUFFER(tmp_frame)[i]; 
+       if(c >= ' ' && c <= '~'){
+            putchar(c);
+        } else {
+            printf(" 0x%02X ", c);
+        }
+    }
+    printf("\nConverted frame: \n");
+    for(size_t i = 0; i < of2g_get_frame_length(frame); ++i){
+       unsigned char c = OF2G_FRAME_2_BUFFER(frame)[i]; 
+            printf(" 0x%02X ", c);
+    }
+    printf("\n");
     return true;
 
 }

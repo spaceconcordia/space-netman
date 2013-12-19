@@ -107,6 +107,7 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
          else if(0 < (n_bytes = net2com->ReadFromInfoPipe(buffer, BUFFLEN))){
             // Read from info pipe
             printf("Read from commander infopipe\n");
+            // log or output what went wrong depending on info pipe data
             netman_new_tx_bytes(netman, (unsigned char *)buffer, n_bytes);
             printf("About to TX data over transceiver!!\n");
             transceiver_write(netman->current_tx_data);
@@ -140,13 +141,13 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
                // we need to make sure the window stays open.
                transceiver_write(netman->current_tx_ack);
                n_bytes = of2g_get_data_content(netman->current_rx_data, (unsigned char *)buffer);
-		printf("n_bytes = '%zu'\n" , n_bytes);
+		printf("Received %zu bytes from ground station\n" , n_bytes);
 //		printf("Buffer = '%s' ", buffer);	
 
 	       net2com->WriteToInfoPipe(infopipe_bytes);
 	       printf("\nWrote to info pipe: 0x%02X\n", infopipe_bytes);
                net2com->WriteToDataPipe(buffer, n_bytes);
-    	       printf("Received Comand: ");
+    	       printf("Netman received Comand: ");
 		for(uint8_t i = 0; i < n_bytes; ++i){
 		   uint8_t c = buffer[i];
 		   if(c >= ' ' && c <= '~'){

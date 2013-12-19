@@ -77,14 +77,21 @@ run
   sh build-apps-folder.sh
 
 run
+  ./space-commanderQ6 &
   ./sat-mbcc
 
 Type in HEX symbols on keyboard on ground station computer with the Kenwood radio terminal:
 
-Example of input on the Kenwood Putty terminal:
-
-010003c53f2a5a
+Input on the Kenwood Putty terminal for the 2 step-command for get-time:
+010001313337
+02000121242b
 
 The satellite netman will receive the frame in ascii, and convert to hex.
 The frame will be converted on the netman as:
-0x01 0x00 0x03 0xc5 0x3f 0x2a 0x5a
+0x01 0x00 0x01 0x31 0x33 0x37
+0x02 0x00 0x01 0x21 0x24 0x2b
+
+The netman will then send the time in ASCII to the Kenwood.
+
+To ACK the satellite, input:
+31210052d5
