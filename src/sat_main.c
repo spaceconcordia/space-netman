@@ -4,15 +4,31 @@
 
 #include <timer.h>
 #include <Net2Com.h>
+#include <shakespeare.h>
 
 #include "../include/netman.h"
 #include "../include/transceiver.h"
 
+
+const string LOGS_FOLDER("/home/logs/");
+FILE* g_fp_log = NULL;
+
+
 void loop_until_session_closed(netman_t *, Net2Com * net2com);
 void loop_until_session_established(netman_t *, Net2Com * net2com);
 
+
+void init_log() {
+   string filename = get_filename(LOGS_FOLDER, "Netman", ".log");
+   string filepath = LOGS_FOLDER + filename;
+   g_fp_log = fopen(filepath.c_str(), "a");
+}
+
 int main()
 {
+   init_log();
+   Log(g_fp_log, NOTICE, "Netman", "Starting");
+   fflush(g_fp_log);
 
    netman_t netman;
    netman_init(&netman);
@@ -24,6 +40,11 @@ int main()
       loop_until_session_established(&netman, &net2com);
 
       loop_until_session_closed(&netman, &net2com);
+   }
+
+   if (g_fp_log) {
+      fclose(g_fp_log);
+      g_fp_log = NULL;
    }
 
    return 0;
@@ -69,6 +90,7 @@ void loop_until_session_established(netman_t * netman, Net2Com * net2com){
          break;
       }
    }
+  Log(g_fp_log, ERROR, "Netman", "Communication session successfully started");
 }
 
 void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
@@ -130,7 +152,7 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
 
             printf("Starting resend timer at line %d\n", __LINE__);
             timer_start(&resend_timer, RESEND_TIMEOUT, 0);
-            
+// Read and log to tell if data completely sent            
          }
       }
 
@@ -192,6 +214,7 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
       }
    }
    printf("Session ended :( !\n");
+   Log(g_fp_log, ERROR, "Netman", "Communication session ended");
 }
 
 
