@@ -5,10 +5,11 @@
 #include <timer.h>
 #include <Net2Com.h>
 #include <shakespeare.h>
-
 #include "../include/netman.h"
 #include "../include/transceiver.h"
 
+
+using namespace std;
 
 const string LOGS_FOLDER("/home/logs/");
 FILE* g_fp_log = NULL;
@@ -38,8 +39,12 @@ int main()
    while(1){
 
       loop_until_session_established(&netman, &net2com);
+      Log(g_fp_log, NOTICE, "Netman", "Session established");
+      fflush(g_fp_log);
 
       loop_until_session_closed(&netman, &net2com);
+      Log(g_fp_log, NOTICE, "Netman", "Session closed");
+      fflush(g_fp_log);
    }
 
    if (g_fp_log) {
@@ -72,7 +77,7 @@ void loop_until_session_established(netman_t * netman, Net2Com * net2com){
          n_bytes = of2g_get_data_content(netman->current_rx_data, (unsigned char *)buffer);
 		 printf("Received %zu bytes from ground station\n" , n_bytes);
          net2com->WriteToInfoPipe(n_bytes);
-	     printf("\nWrote to info pipe: 0x%02X\n", n_bytes);
+	     printf("\nWrote to info pipe: %zu\n", n_bytes);
          net2com->WriteToDataPipe(buffer, n_bytes);
 
     	 printf("Netman received Comand: ");
@@ -90,7 +95,6 @@ void loop_until_session_established(netman_t * netman, Net2Com * net2com){
          break;
       }
    }
-  Log(g_fp_log, ERROR, "Netman", "Communication session successfully started");
 }
 
 void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
@@ -145,6 +149,16 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
             // Read from info pipe
             printf("Read from commander infopipe\n");
             // log or output what went wrong depending on info pipe data
+            if(buffer[0] == 0x31) {
+              printf("Read %c from infopipe, ERROR creating command\n", buffer[0]);
+              Log(g_fp_log, NOTICE, "Netman", "Commander could not create command");
+              fflush(g_fp_log);
+            }
+            else if (buffer[0] == 0x32) {
+              printf("Read %d from infopipe, ERROR creating command\n", buffer[0]);
+              Log(g_fp_log, NOTICE, "Netman", "Commander could not execute command");
+              fflush(g_fp_log);
+            }
             netman_new_tx_bytes(netman, (unsigned char *)buffer, n_bytes);
             printf("About to TX data over transceiver!!\n");
             transceiver_write(netman->current_tx_data);
@@ -181,7 +195,7 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
 		printf("Received %zu bytes from ground station\n" , n_bytes);
 
 	       net2com->WriteToInfoPipe(n_bytes);
-	       printf("\nWrote to info pipe: 0x%02X\n", n_bytes);
+	       printf("\nWrote to info pipe: %zu\n", n_bytes);
                net2com->WriteToDataPipe(buffer, n_bytes);
     	       printf("Netman received Comand: ");
 		for(uint8_t i = 0; i < n_bytes; ++i){
@@ -214,7 +228,6 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
       }
    }
    printf("Session ended :( !\n");
-   Log(g_fp_log, ERROR, "Netman", "Communication session ended");
 }
 
 

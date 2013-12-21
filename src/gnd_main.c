@@ -116,6 +116,11 @@ void loop_until_session_closed(netman_t * netman){
                   }
                }
 
+               if(buffer[0] == 0x31)
+                 printf("\nCommander could not create command\n");
+               else if(buffer[0] == 0x32)
+                 printf("Command could not execute command\n");
+
                timer_start(&window_timer, WINDOW_TIMEOUT, 0);
                break;
             case DUP_DATA:
