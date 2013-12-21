@@ -21,7 +21,7 @@ int main()
 
    while(1){
 
-      //loop_until_session_established(&netman, &net2com);
+      loop_until_session_established(&netman, &net2com);
 
       loop_until_session_closed(&netman, &net2com);
    }
@@ -34,9 +34,10 @@ void loop_until_session_established(netman_t * netman, Net2Com * net2com){
    const size_t BUFFLEN = 256;
    char buffer[BUFFLEN]; // TODO - exact max size
    size_t n_bytes;
+   unsigned char end_command = 0xFF;
 
    of2g_frame_t frame;
-
+   printf("Waiting for session to establish...\n");
    while(1){
 
       if(
@@ -48,8 +49,23 @@ void loop_until_session_established(netman_t * netman, Net2Com * net2com){
          netman_rx_frame(netman,frame); // this will set the netman state and process the received frame
          transceiver_write(netman->current_tx_ack);
          n_bytes = of2g_get_data_content(netman->current_rx_data, (unsigned char *)buffer);
+		 printf("Received %zu bytes from ground station\n" , n_bytes);
+         net2com->WriteToInfoPipe(n_bytes);
+	     printf("\nWrote to info pipe: 0x%02X\n", n_bytes);
          net2com->WriteToDataPipe(buffer, n_bytes);
 
+    	 printf("Netman received Comand: ");
+		 for(uint8_t i = 0; i < n_bytes; ++i){
+		   uint8_t c = buffer[i];
+		   if(c >= ' ' && c <= '~'){
+			putchar(c);
+			} else {
+				printf(" 0x%02X ", c);
+			}
+		}
+
+	    net2com->WriteToInfoPipe(end_command); 
+	    printf("\nWrote to info pipe: 0x%02X\n", end_command);
          break;
       }
    }
@@ -61,7 +77,6 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
    char buffer[BUFFLEN]; // TODO - exact max size
    size_t n_bytes;
    unsigned char end_command = 0xFF;
-   unsigned char infopipe_bytes = 0x01;
    of2g_frame_t frame;
 
    timer_t window_timer = timer_get();
@@ -70,7 +85,7 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
    // values in seconds
    const uint32_t RESEND_TIMEOUT =      10;
    const uint32_t WINDOW_TIMEOUT = 15 * 60;
-
+   printf("Session started!\n");
    timer_start(&window_timer, WINDOW_TIMEOUT, 0);
 
    // We continue in the loop as long as the window is open
@@ -142,10 +157,9 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
                transceiver_write(netman->current_tx_ack);
                n_bytes = of2g_get_data_content(netman->current_rx_data, (unsigned char *)buffer);
 		printf("Received %zu bytes from ground station\n" , n_bytes);
-//		printf("Buffer = '%s' ", buffer);	
 
-	       net2com->WriteToInfoPipe(infopipe_bytes);
-	       printf("\nWrote to info pipe: 0x%02X\n", infopipe_bytes);
+	       net2com->WriteToInfoPipe(n_bytes);
+	       printf("\nWrote to info pipe: 0x%02X\n", n_bytes);
                net2com->WriteToDataPipe(buffer, n_bytes);
     	       printf("Netman received Comand: ");
 		for(uint8_t i = 0; i < n_bytes; ++i){
@@ -177,6 +191,7 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
          }
       }
    }
+   printf("Session ended :( !\n");
 }
 
 

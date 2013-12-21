@@ -3,9 +3,18 @@ NETMAN_DIR=$(dirname "$NETMAN")
 mkdir -p bin
 mkdir -p lib/include
 
+echo '\n Building shakespeare...\n'
+cd ../space-lib/shakespeare
+echo "cd: \c"
+pwd
+cp inc/shakespeare.h $NETMAN_DIR/lib/include
+sh x86-compile-lib-static.sh
+cp lib/libshakespeare.a $NETMAN_DIR/lib
+
 # Builds libhe100.a 
 echo '\n Building HE-100 Library...\n'
 
+cd $NETMAN_DIR
 cd ../HE100-lib/C
 echo "cd: \c" 
 pwd
@@ -40,6 +49,7 @@ cp staticlibs.tar $NETMAN_DIR/lib
 cd $NETMAN_DIR/lib
 tar -xf staticlibs.tar
 rm staticlibs.tar
+
 
 cd $NETMAN_DIR/lib
 ls -al
