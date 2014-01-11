@@ -153,13 +153,16 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
               printf("Read %c from infopipe, ERROR creating command\n", buffer[0]);
               Log(g_fp_log, NOTICE, "Netman", "Commander could not create command");
               fflush(g_fp_log);
+              sprintf(buffer,"Error creating command");
+              netman_new_tx_bytes(netman, (unsigned char *)buffer, strlen(buffer));
             }
             else if (buffer[0] == 0x32) {
-              printf("Read %d from infopipe, ERROR creating command\n", buffer[0]);
+              printf("Read %d from infopipe, ERROR executing command\n", buffer[0]);
               Log(g_fp_log, NOTICE, "Netman", "Commander could not execute command");
               fflush(g_fp_log);
+              sprintf(buffer,"Error executing command");
+              netman_new_tx_bytes(netman, (unsigned char *)buffer, strlen(buffer));
             }
-            netman_new_tx_bytes(netman, (unsigned char *)buffer, n_bytes);
             printf("About to TX data over transceiver!!\n");
             transceiver_write(netman->current_tx_data);
             printf("Done TX data over transceiver!!\n");
