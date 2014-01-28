@@ -1,7 +1,7 @@
 #include <SC_he100.h>
 #include "../include/of2g.h"
 
-unsigned char g_ackFID = 0x21;
+unsigned char g_ackFID = 0x01;
 
 // This function should inspect the given of2g frame and return
 // a bool indicating whether it is valid. At a minimum this should
@@ -11,7 +11,7 @@ unsigned char g_ackFID = 0x21;
 // return true if `frame` is good and false if it is bad
 bool of2g_valid_frame(of2g_frame_t frame)
 {
-	size_t length = OF2G_FRAME_2_BUFFER(frame)[2]; 
+	size_t length = OF2G_FRAME_2_BUFFER(frame)[2];
 
 	if(of2g_get_fid(frame) == 0x0)
 		return false;
@@ -74,7 +74,7 @@ size_t of2g_get_length(of2g_frame_t frame)
 size_t of2g_get_data_content(of2g_frame_t frame, unsigned char * out)
 {
 	size_t length = OF2G_FRAME_2_BUFFER(frame)[2];
-	
+
 	size_t i;
 	for(i=0 ;i < length ;++i)
 	{
@@ -101,12 +101,12 @@ bool of2g_build_data_frame(unsigned char * buffer, size_t length, unsigned char 
 	OF2G_FRAME_2_BUFFER(out)[0] = fid;
 	OF2G_FRAME_2_BUFFER(out)[1] = 0x0;
 	OF2G_FRAME_2_BUFFER(out)[2] = length;
-	
+
 	HE100_checksum frame_checksum = HE100_fletcher16((unsigned char *)OF2G_FRAME_2_BUFFER(out), length+3);
 
 	OF2G_FRAME_2_BUFFER(out)[3+length]   = frame_checksum.sum1;
 	OF2G_FRAME_2_BUFFER(out)[3+length+1] = frame_checksum.sum2;
-	
+
 	if(of2g_valid_frame(out))
 		return true;
 	else
@@ -119,9 +119,9 @@ bool of2g_build_data_frame(unsigned char * buffer, size_t length, unsigned char 
 // was built successfully, and false otherwise.
 bool of2g_build_ack_frame(of2g_frame_t data_frame, of2g_frame_t out)
 {
-	OF2G_FRAME_2_BUFFER(out)[0] = g_ackFID; // FID of the ack frame 
-	if(g_ackFID == 126)
-		g_ackFID = 0x20;
+	OF2G_FRAME_2_BUFFER(out)[0] = g_ackFID; // FID of the ack frame
+	if(g_ackFID == 255)
+		g_ackFID = 0x00;
 
 	g_ackFID += 1;
 
@@ -133,12 +133,12 @@ bool of2g_build_ack_frame(of2g_frame_t data_frame, of2g_frame_t out)
 
 	OF2G_FRAME_2_BUFFER(out)[3] = frame_checksum.sum1;
 	OF2G_FRAME_2_BUFFER(out)[4] = frame_checksum.sum2;
-	
+
 	if(of2g_valid_frame(out))
 		return true;
 	else
 		return false;
-	
+
 	/*
 	Log(FILE* lf, Priority ePriority, string process, string msg);
 	*/
