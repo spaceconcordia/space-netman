@@ -1,5 +1,5 @@
-#ifndef CDH_GND_H_
-#define CDH_GND_H_
+#ifndef GND_CDH_H_
+#define GND_CDH_H_
 
 // This file defines the logic of the command and data handling on the ground station
 // upon communication with the satellite
@@ -20,6 +20,7 @@
 // 7. Have a CLI and parse user input
 // 8. Review return types & function parameters
 // 9. Store and display time of received data
+// 10. Store command response/data
 
 // Reasons to use SQL for log managing:
 // 1. Obtain specific log information (temperature reading from sensor x)

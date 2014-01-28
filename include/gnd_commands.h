@@ -1,5 +1,5 @@
-#ifndef CDH_GND_H_
-#define CDH_GND_H_
+#ifndef GND_COMMANDS_H_
+#define GND_COMMANDS_H_
 
 //  This file describes how command frames are built and sent to the satellite
 
