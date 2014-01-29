@@ -75,23 +75,23 @@ void loop_until_session_established(netman_t * netman, Net2Com * net2com){
          netman_rx_frame(netman,frame); // this will set the netman state and process the received frame
          transceiver_write(netman->current_tx_ack);
          n_bytes = of2g_get_data_content(netman->current_rx_data, (unsigned char *)buffer);
-		 printf("Received %zu bytes from ground station\n" , n_bytes);
+     printf("Received %zu bytes from ground station\n" , n_bytes);
          net2com->WriteToInfoPipe(n_bytes);
-	     printf("\nWrote to info pipe: %zu\n", n_bytes);
+       printf("\nWrote to info pipe: %zu\n", n_bytes);
          net2com->WriteToDataPipe(buffer, n_bytes);
 
-    	 printf("Netman received Comand: ");
-		 for(uint8_t i = 0; i < n_bytes; ++i){
-		   uint8_t c = buffer[i];
-		   if(c >= ' ' && c <= '~'){
-			putchar(c);
-			} else {
-				printf(" 0x%02X ", c);
-			}
-		}
+       printf("Netman received Comand: ");
+     for(uint8_t i = 0; i < n_bytes; ++i){
+       uint8_t c = buffer[i];
+       if(c >= ' ' && c <= '~'){
+      putchar(c);
+      } else {
+        printf(" 0x%02X ", c);
+      }
+    }
 
-	    net2com->WriteToInfoPipe(end_command); 
-	    printf("\nWrote to info pipe: 0x%02X\n", end_command);
+      net2com->WriteToInfoPipe(end_command); 
+      printf("\nWrote to info pipe: 0x%02X\n", end_command);
          break;
       }
    }
@@ -195,23 +195,23 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
                // we need to make sure the window stays open.
                transceiver_write(netman->current_tx_ack);
                n_bytes = of2g_get_data_content(netman->current_rx_data, (unsigned char *)buffer);
-		printf("Received %zu bytes from ground station\n" , n_bytes);
+    printf("Received %zu bytes from ground station\n" , n_bytes);
 
-	       net2com->WriteToInfoPipe(n_bytes);
-	       printf("\nWrote to info pipe: %zu\n", n_bytes);
+         net2com->WriteToInfoPipe(n_bytes);
+         printf("\nWrote to info pipe: %zu\n", n_bytes);
                net2com->WriteToDataPipe(buffer, n_bytes);
-    	       printf("Netman received Comand: ");
-		for(uint8_t i = 0; i < n_bytes; ++i){
-		   uint8_t c = buffer[i];
-		   if(c >= ' ' && c <= '~'){
-			putchar(c);
-			} else {
-				printf(" 0x%02X ", c);
-			}
-		}
+             printf("Netman received Comand: ");
+    for(uint8_t i = 0; i < n_bytes; ++i){
+       uint8_t c = buffer[i];
+       if(c >= ' ' && c <= '~'){
+      putchar(c);
+      } else {
+        printf(" 0x%02X ", c);
+      }
+    }
 
-	       net2com->WriteToInfoPipe(end_command); 
-	       printf("\nWrote to info pipe: 0x%02X\n", end_command);
+         net2com->WriteToInfoPipe(end_command); 
+         printf("\nWrote to info pipe: 0x%02X\n", end_command);
                timer_start(&window_timer, WINDOW_TIMEOUT, 0);
                break;
             case DUP_DATA:
