@@ -6,6 +6,7 @@ OPT_LVL = 1
 CC      = g++
 CCFLAGS = -c -O$(OPT_LVL) $(WARNINGS)
 MICROCC=microblazeel-xilinx-linux-gnu-g++
+BEAGLECC=arm-linux-gnueabi-g++
 MICROCFLAGS=-mcpu=v8.10.a -mxl-barrel-shift -mxl-multiply-high -mxl-pattern-compare -mno-xl-soft-mul -mno-xl-soft-div -mxl-float-sqrt -mhard-float -mxl-float-convert -ffixed-r31 --sysroot /usr/local/lib/mbgcc/microblaze-unknown-linux-gnu/sys-root -Wall
 # Linker
 LD      = g++
@@ -23,6 +24,8 @@ INCFLAGS = -I./lib/include
 
 MICROLIBS     := Net2Com-mbcc.a NamedPipe-mbcc.a libtimer-mbcc.a libhe100-mbcc.a libshakespeare-mbcc.a
 MICROLIBS     := $(addprefix lib/, $(MICROLIBS))
+BEAGLELIBS    := Net2Com-BB.a NamedPipe-BB.a libtimer-BB.a libhe100-BB.a libshakespeare-BB.a
+BEAGLELIBS    := $(addprefix lib/, $(BEAGLELIBS))
 
 BIN_DIR = bin
 SAT_BIN_FILE= $(BIN_DIR)/sat
@@ -30,8 +33,11 @@ GND_BIN_FILE= $(BIN_DIR)/gnd
 VALVE_BIN_FILE = $(BIN_DIR)/valve
 SAT_BIN_FILEQ6= $(BIN_DIR)/sat-mbcc
 GND_BIN_FILEQ6= $(BIN_DIR)/gnd-mbcc
+SAT_BIN_FILEBB= $(BIN_DIR)/sat-BB
+GND_BIN_FILEBB= $(BIN_DIR)/gnd-BB
 ALL_TRG = $(SAT_BIN_FILE) $(GND_BIN_FILE)
-ALL_TRGQ6 = $(SAT_BIN_FILEQ6) $(GND_BIN_FILEQ6) 
+ALL_TRGQ6 = $(SAT_BIN_FILEQ6) $(GND_BIN_FILEQ6)
+ALL_TRGBB = $(SAT_BIN_FILEBB) $(GND_BIN_FILEBB)
 # Generate exact dependencies using a smart method that I found online.
 #
 # The basic idea is that we don't need to know the dependencies until
@@ -50,6 +56,7 @@ MAKE_DEPENDQ6 = mkdir -p $(DEP_DIR)/$(dir $*); $(CPP) -MM $(CCFLAGS) $< -o $(DEP
 # Make our dep_dir and our hex file
 all: $(ALL_TRG)
 Q6: $(ALL_TRGQ6)
+BB: $(ALL_TRGBB)
 # get rid of all the shit we created
 clean:
 	rm -rf $(DEP_DIR)
@@ -105,21 +112,12 @@ $(SAT_BIN_FILE): $(SRCS:%.c=%.o) src/sat_transceiver.o src/sat_main.o $(LIBS) $(
 	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
 
 
-# Q6 shit down here 
+# Q6 shit down here
 
-#%.o: %.cpp $(DEP_DIR)
-#	$(CC) $(INCFLAGS) $(CCFLAGS) $< -o $@
-#	@$(MAKE_DEPEND)
+src/of2gQ6.o : src/of2g.c
+	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -c -o src/of2gQ6.o
 
-#%.o: %.c $(DEP_DIR)
-#	$(CC) $(INCFLAGS) $(CCFLAGS) $< -o $@
-#	@$(MAKE_DEPEND)
-
-
-src/of2gQ6.o : src/of2g.c 
-	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -c -o src/of2gQ6.o 
-
-src/netmanQ6.o : src/netman.c 
+src/netmanQ6.o : src/netman.c
 	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -c -o src/netmanQ6.o
 
 src/gnd_transceiverQ6.o : src/transceiver.c
@@ -135,7 +133,7 @@ src/gnd_mainQ6.o : src/gnd_main.c src/gnd_transceiverQ6.o
 src/sat_mainQ6.o : src/sat_main.c src/sat_transceiverQ6.o
 	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -c -o src/sat_mainQ6.o
 
-src/sat_transceiverQ6.o: src/transceiver.c 
+src/sat_transceiverQ6.o: src/transceiver.c
 	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -c -o src/sat_transceiverQ6.o
 
 $(GND_BIN_FILEQ6): src/of2gQ6.o src/netmanQ6.o src/gnd_transceiverQ6.o src/gnd_mainQ6.o $(MICROLIBS) $(BIN_DIR)
@@ -143,4 +141,34 @@ $(GND_BIN_FILEQ6): src/of2gQ6.o src/netmanQ6.o src/gnd_transceiverQ6.o src/gnd_m
 
 $(SAT_BIN_FILEQ6): src/of2gQ6.o src/netmanQ6.o src/sat_transceiverQ6.o src/sat_mainQ6.o $(MICROLIBS) $(BIN_DIR)
 	$(MICROLD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
+
+# BeagleBone is THE shit
+
+src/of2gBB.o : src/of2g.c
+	$(BEAGLECC) $(INCFLAGS) $< -c -o src/of2gBB.o
+
+src/netmanBB.o : src/netman.c
+	$(BEAGLECC) $(INCFLAGS) $< -c -o src/netmanBB.o
+
+src/gnd_transceiverBB.o : src/transceiver.c
+	$(BEAGLECC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="gnd-out-sat-in"' \
+	                  -D'TRNSCVR_RX_PIPE="sat-out-gnd-in"' \
+							-D'USE_PIPE_TRNSCVR' \
+							-D'VALVE_TX_PIPE="gnd_valve"' \
+$(MICROCCFLAGS) $< -c -o src/gnd_transceiverBB.o
+
+src/gnd_mainBB.o : src/gnd_main.c src/gnd_transceiverBB.o
+	$(BEAGLECC) $(INCFLAGS) $< -c -o src/gnd_mainBB.o
+
+src/sat_mainBB.o : src/sat_main.c src/sat_transceiverBB.o
+	$(BEAGLECC) $(INCFLAGS) $< -c -o src/sat_mainBB.o
+
+src/sat_transceiverBB.o: src/transceiver.c
+	$(BEAGLECC) $(INCFLAGS) $< -c -o src/sat_transceiverBB.o
+
+$(GND_BIN_FILEBB): src/of2gBB.o src/netmanBB.o src/gnd_transceiverBB.o src/gnd_mainBB.o $(BEAGLELIBS) $(BIN_DIR)
+	$(BEAGLECC) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
+
+$(SAT_BIN_FILEBB): src/of2gBB.o src/netmanBB.o src/sat_transceiverBB.o src/sat_mainBB.o $(BEAGLELIBS) $(BIN_DIR)
+	$(BEAGLECC) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
 

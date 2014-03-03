@@ -10,6 +10,7 @@
 
 
 using namespace std;
+#define filename "Netman"
 
 const string LOGS_FOLDER("/home/logs/");
 FILE* g_fp_log = NULL;
@@ -20,15 +21,13 @@ void loop_until_session_established(netman_t *, Net2Com * net2com);
 
 
 void init_log() {
-   string filename = get_filename(LOGS_FOLDER, "Netman", ".log");
-   string filepath = LOGS_FOLDER + filename;
-   g_fp_log = fopen(filepath.c_str(), "a");
+   g_fp_log = Shakespeare::open_log (LOGS_FOLDER, filename);
 }
 
 int main()
 {
    init_log();
-   Log(g_fp_log, NOTICE, "Netman", "Starting");
+   Shakespeare::log(g_fp_log, Shakespeare::NOTICE, "Netman", "Starting");
    fflush(g_fp_log);
 
    netman_t netman;
@@ -39,11 +38,11 @@ int main()
    while(1){
 
       loop_until_session_established(&netman, &net2com);
-      Log(g_fp_log, NOTICE, "Netman", "Session established");
+      Shakespeare::log(g_fp_log, Shakespeare::NOTICE, "Netman", "Session established");
       fflush(g_fp_log);
 
       loop_until_session_closed(&netman, &net2com);
-      Log(g_fp_log, NOTICE, "Netman", "Session closed");
+      Shakespeare::log(g_fp_log, Shakespeare::NOTICE, "Netman", "Session closed");
       fflush(g_fp_log);
    }
 
@@ -151,14 +150,14 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
             // log or output what went wrong depending on info pipe data
             if(buffer[0] == 0x31) {
               printf("Read %c from infopipe, ERROR creating command\n", buffer[0]);
-              Log(g_fp_log, NOTICE, "Netman", "Commander could not create command");
+              Shakespeare::log(g_fp_log, Shakespeare::NOTICE, "Netman", "Commander could not create command");
               fflush(g_fp_log);
               sprintf(buffer,"Error creating command");
               netman_new_tx_bytes(netman, (unsigned char *)buffer, strlen(buffer));
             }
             else if (buffer[0] == 0x32) {
               printf("Read %d from infopipe, ERROR executing command\n", buffer[0]);
-              Log(g_fp_log, NOTICE, "Netman", "Commander could not execute command");
+              Shakespeare::log(g_fp_log, Shakespeare::NOTICE, "Netman", "Commander could not execute command");
               fflush(g_fp_log);
               sprintf(buffer,"Error executing command");
               netman_new_tx_bytes(netman, (unsigned char *)buffer, strlen(buffer));
