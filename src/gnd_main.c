@@ -9,9 +9,13 @@
 #include "../include/netman.h"
 #include "../include/transceiver.h"
 
+#define MAX_QUEUE_SIZE 100
+
 void loop_until_session_closed(netman_t *);
 
 static NamedPipe gnd_input("gnd-input");
+
+of2g_frame_t command_queue[MAX_QUEUE_SIZE];
 
 int main()
 {

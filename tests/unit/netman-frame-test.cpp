@@ -7,18 +7,18 @@ class Netman_frame_Test : public ::testing::Test {
 	protected:
 	virtual void SetUp() {
 }
-	
-	
+
+
 	of2g_frame_t valid_dataframe = { 0x01, 0x0, 0x09, 0x6f, 0x6c, 0x69, 0x76, 0x69, 0x65, 0x72, 0x73, 0x63, 0xda, 0x90};
-  of2g_frame_t expected_ackframe = { 0x01, 0x01, 0x0, 0x02, 0x05};  
+  of2g_frame_t expected_ackframe = { 0x01, 0x01, 0x0, 0x02, 0x05};
 	unsigned char buffer[10] = {0x6f, 0x6c, 0x69, 0x76, 0x69, 0x65, 0x72, 0x73, 0x63, 0x0};
 	netman_t netman;
-	
+
 };
 
 // Verify that Ack is sent based on data we receive
 TEST_F(Netman_frame_Test, GoodAckFrameToSend) {
-	
+
 	memcpy(netman.current_rx_data, valid_dataframe, sizeof(of2g_frame_t));
 	build_ack_frame(&netman, netman.current_rx_data);
 	ASSERT_EQ(0x1, netman.current_tx_fid);
@@ -30,9 +30,9 @@ TEST_F(Netman_frame_Test, GoodAckFrameToSend) {
 }
 
 // Verify reception of data frame
-TEST_F(Netman_frame_Test, GoodDataFrameRead) { 
+TEST_F(Netman_frame_Test, GoodDataFrameRead) {
 	//  DATA: New data (ACK SENT?)
-  netman_rx_frame(&netman, valid_dataframe);	
+  netman_rx_frame(&netman, valid_dataframe);
   ASSERT_EQ(NEW_DATA, netman.rx_state);
   // test memcpy ( read frame with current_rx_data )
 	size_t frame_length = valid_dataframe[2] + 5;
@@ -43,7 +43,7 @@ TEST_F(Netman_frame_Test, GoodDataFrameRead) {
 
 // Check new data frame was built according to raw data and was stored correctly
 TEST_F(Netman_frame_Test, GoodDataFrameToSend) {
-	netman.current_tx_fid = 0x01; 
+	netman.current_tx_fid = 0x01;
 	size_t length = 9;
 	netman_new_tx_bytes(&netman, buffer, length);
 	// verify tx_state and current_tx_data was set
@@ -53,7 +53,7 @@ TEST_F(Netman_frame_Test, GoodDataFrameToSend) {
 
 
 	ASSERT_EQ(WAITING_FOR_ACK, netman.tx_state);
-	 
+
 	// verify fid was set
 	ASSERT_EQ(0x01, netman.current_tx_fid);
 }

@@ -20,7 +20,7 @@ echo "cd: \c"
 pwd
 sh mbcc-compile-lib-static-cpp.sh
 cp lib/libhe100-mbcc.a $NETMAN_DIR/lib
-cp src/SC_he100.h $NETMAN_DIR/lib/include
+cp inc/SC_he100.h $NETMAN_DIR/lib/include
 
 # Timer library
 echo '\n Building timer Library...\n'

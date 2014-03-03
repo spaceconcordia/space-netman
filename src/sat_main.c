@@ -90,7 +90,7 @@ void loop_until_session_established(netman_t * netman, Net2Com * net2com){
       }
     }
 
-      net2com->WriteToInfoPipe(end_command); 
+      net2com->WriteToInfoPipe(end_command);
       printf("\nWrote to info pipe: 0x%02X\n", end_command);
          break;
       }
@@ -169,7 +169,7 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
 
             printf("Starting resend timer at line %d\n", __LINE__);
             timer_start(&resend_timer, RESEND_TIMEOUT, 0);
-// Read and log to tell if data completely sent            
+// Read and log to tell if data completely sent
          }
       }
 
@@ -210,7 +210,7 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com){
       }
     }
 
-         net2com->WriteToInfoPipe(end_command); 
+         net2com->WriteToInfoPipe(end_command);
          printf("\nWrote to info pipe: 0x%02X\n", end_command);
                timer_start(&window_timer, WINDOW_TIMEOUT, 0);
                break;

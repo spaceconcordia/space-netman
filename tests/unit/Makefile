@@ -69,7 +69,7 @@ gtest_main.a : gtest-all.o gtest_main.o
 
 ###########################
 
-netman.o : $(USER_DIR)/src/netman.c $(USER_DIR)/include/netman.h of2g.o 
+netman.o : $(USER_DIR)/src/netman.c $(USER_DIR)/include/netman.h of2g.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/src/netman.c
 
 of2g.o : $(USER_DIR)/src/of2g.c $(USER_DIR)/include/of2g.h
@@ -79,7 +79,7 @@ netman-of2g-test.o : $(USER_DIR)/tests/unit/netman-of2g-test.cpp $(USER_DIR)/inc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/tests/unit/netman-of2g-test.cpp
 
 netman-of2g-test : of2g.o netman-of2g-test.o gtest_main.a $(USER_DIR)/lib/libhe100.a $(USER_DIR)/lib/libtimer.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ -lrt -lpthread 
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ -lrt -lpthread
 
 netman-frame-test.o : $(USER_DIR)/tests/unit/netman-frame-test.cpp $(USER_DIR)/include/netman.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/tests/unit/netman-frame-test.cpp
