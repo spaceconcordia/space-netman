@@ -1,4 +1,5 @@
 #include <SC_he100.h>
+#include <fletcher.h>
 #include "../include/of2g.h"
 
 unsigned char g_ackFID = 0x01;
@@ -17,7 +18,7 @@ bool of2g_valid_frame(of2g_frame_t frame)
     return false;
 
   // verify checksum
-  HE100_checksum frame_checksum = HE100_fletcher16((unsigned char*)OF2G_FRAME_2_BUFFER(frame), length+3);
+  fletcher_checksum frame_checksum = fletcher_checksum16((unsigned char*)OF2G_FRAME_2_BUFFER(frame), length+3);
   if(OF2G_FRAME_2_BUFFER(frame)[length+3]   == frame_checksum.sum1 &&
       OF2G_FRAME_2_BUFFER(frame)[3+length+1] == frame_checksum.sum2 )
   {
@@ -102,7 +103,7 @@ bool of2g_build_data_frame(unsigned char * buffer, size_t length, unsigned char 
   OF2G_FRAME_2_BUFFER(out)[1] = 0x0;
   OF2G_FRAME_2_BUFFER(out)[2] = length;
 
-  HE100_checksum frame_checksum = HE100_fletcher16((unsigned char *)OF2G_FRAME_2_BUFFER(out), length+3);
+  fletcher_checksum frame_checksum = fletcher_checksum16((unsigned char *)OF2G_FRAME_2_BUFFER(out), length+3);
 
   OF2G_FRAME_2_BUFFER(out)[3+length]   = frame_checksum.sum1;
   OF2G_FRAME_2_BUFFER(out)[3+length+1] = frame_checksum.sum2;
@@ -129,7 +130,7 @@ bool of2g_build_ack_frame(of2g_frame_t data_frame, of2g_frame_t out)
   OF2G_FRAME_2_BUFFER(out)[2] = 0; // assuming ACK has no data
 
   // place checksum
-  HE100_checksum frame_checksum = HE100_fletcher16((unsigned char*)OF2G_FRAME_2_BUFFER(out), 3);
+  fletcher_checksum frame_checksum = fletcher_checksum16((unsigned char*)OF2G_FRAME_2_BUFFER(out), 3);
 
   OF2G_FRAME_2_BUFFER(out)[3] = frame_checksum.sum1;
   OF2G_FRAME_2_BUFFER(out)[4] = frame_checksum.sum2;

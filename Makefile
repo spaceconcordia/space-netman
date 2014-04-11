@@ -18,13 +18,13 @@ PROJ    = netman
 SRCS    := netman.c of2g.c
 SRCS    := $(addprefix src/, $(SRCS))
 
-LIBS     := Net2Com.a NamedPipe.a libhe100.a libtimer.a libshakespeare.a
+LIBS     := Net2Com.a NamedPipe.a libfletcher.a libhe100.a libtimer.a libshakespeare.a
 LIBS     := $(addprefix lib/, $(LIBS))
 INCFLAGS = -I./lib/include
 
-MICROLIBS     := Net2Com-mbcc.a NamedPipe-mbcc.a libtimer-mbcc.a libhe100-mbcc.a libshakespeare-mbcc.a
+MICROLIBS     := Net2Com-mbcc.a NamedPipe-mbcc.a libtimer-mbcc.a libfletcher-mbcc.a libhe100-mbcc.a libshakespeare-mbcc.a
 MICROLIBS     := $(addprefix lib/, $(MICROLIBS))
-BEAGLELIBS    := Net2Com-BB.a NamedPipe-BB.a libtimer-BB.a libhe100-BB.a libshakespeare-BB.a
+BEAGLELIBS    := Net2Com-BB.a NamedPipe-BB.a libtimer-BB.a libflecher-BB.a libhe100-BB.a libshakespeare-BB.a
 BEAGLELIBS    := $(addprefix lib/, $(BEAGLELIBS))
 
 BIN_DIR = bin
