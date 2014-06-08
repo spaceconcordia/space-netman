@@ -30,7 +30,7 @@ void transceiver_init(){
    if(!initialized){
       if (!hetx.Exist()) hetx.CreatePipe();
       if (!herx.Exist()) herx.CreatePipe();
-      herx.ensure_open('r');
+      herx.Open('r');
       initialized = true;
    }
 }

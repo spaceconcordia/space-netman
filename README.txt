@@ -52,9 +52,9 @@ Simulation of ground station with satellite netman & commander on PC:
 Open 4 terminals:
 
 run
+  ./space-commander
   ./sat
   ./gnd
-  ./space-commander
 
 Type in last terminal:
 
