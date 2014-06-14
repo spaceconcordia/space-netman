@@ -18,9 +18,10 @@ PROJ    = netman
 SRCS    := netman.c of2g.c
 SRCS    := $(addprefix src/, $(SRCS))
 
+LIBPATH 	= ../space-lib/lib/
+INCFLAGS 	= -I../space-lib/include
 LIBS     := Net2Com.a NamedPipe.a libfletcher.a libhe100.a libtimer.a libshakespeare.a
-LIBS     := $(addprefix lib/, $(LIBS))
-INCFLAGS = -I../space-lib/include
+LIBS     := $(addprefix $(LIBPATH), $(LIBS))
 
 MICROLIBS     := Net2Com-mbcc.a NamedPipe-mbcc.a libtimer-mbcc.a libfletcher-mbcc.a libhe100-mbcc.a libshakespeare-mbcc.a
 MICROLIBS     := $(addprefix lib/, $(MICROLIBS))
