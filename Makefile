@@ -20,7 +20,7 @@ SRCS    := $(addprefix src/, $(SRCS))
 
 LIBS     := Net2Com.a NamedPipe.a libfletcher.a libhe100.a libtimer.a libshakespeare.a
 LIBS     := $(addprefix lib/, $(LIBS))
-INCFLAGS = -I./lib/include
+INCFLAGS = -I../space-lib/include
 
 MICROLIBS     := Net2Com-mbcc.a NamedPipe-mbcc.a libtimer-mbcc.a libfletcher-mbcc.a libhe100-mbcc.a libshakespeare-mbcc.a
 MICROLIBS     := $(addprefix lib/, $(MICROLIBS))
@@ -141,8 +141,6 @@ $(GND_BIN_FILEQ6): src/of2gQ6.o src/netmanQ6.o src/gnd_transceiverQ6.o src/gnd_m
 
 $(SAT_BIN_FILEQ6): src/of2gQ6.o src/netmanQ6.o src/sat_transceiverQ6.o src/sat_mainQ6.o $(MICROLIBS) $(BIN_DIR)
 	$(MICROLD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
-
-# BeagleBone is THE shit
 
 src/of2gBB.o : src/of2g.c
 	$(BEAGLECC) $(INCFLAGS) $< -c -o src/of2gBB.o
