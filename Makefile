@@ -18,13 +18,14 @@ PROJ    = netman
 SRCS    := netman.c of2g.c
 SRCS    := $(addprefix src/, $(SRCS))
 
-LIBS     := Net2Com.a NamedPipe.a libhe100.a libtimer.a libshakespeare.a
-LIBS     := $(addprefix lib/, $(LIBS))
-INCFLAGS = -I./lib/include
+LIBPATH 	= ../space-lib/lib/
+INCFLAGS 	= -I../space-lib/include
+LIBS     := Net2Com.a NamedPipe.a libfletcher.a libhe100.a libtimer.a libshakespeare.a
+LIBS     := $(addprefix $(LIBPATH), $(LIBS))
 
-MICROLIBS     := Net2Com-mbcc.a NamedPipe-mbcc.a libtimer-mbcc.a libhe100-mbcc.a libshakespeare-mbcc.a
+MICROLIBS     := Net2Com-mbcc.a NamedPipe-mbcc.a libtimer-mbcc.a libfletcher-mbcc.a libhe100-mbcc.a libshakespeare-mbcc.a
 MICROLIBS     := $(addprefix lib/, $(MICROLIBS))
-BEAGLELIBS    := Net2Com-BB.a NamedPipe-BB.a libtimer-BB.a libhe100-BB.a libshakespeare-BB.a
+BEAGLELIBS    := Net2Com-BB.a NamedPipe-BB.a libtimer-BB.a libflecher-BB.a libhe100-BB.a libshakespeare-BB.a
 BEAGLELIBS    := $(addprefix lib/, $(BEAGLELIBS))
 
 BIN_DIR = bin
@@ -141,8 +142,6 @@ $(GND_BIN_FILEQ6): src/of2gQ6.o src/netmanQ6.o src/gnd_transceiverQ6.o src/gnd_m
 
 $(SAT_BIN_FILEQ6): src/of2gQ6.o src/netmanQ6.o src/sat_transceiverQ6.o src/sat_mainQ6.o $(MICROLIBS) $(BIN_DIR)
 	$(MICROLD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
-
-# BeagleBone is THE shit
 
 src/of2gBB.o : src/of2g.c
 	$(BEAGLECC) $(INCFLAGS) $< -c -o src/of2gBB.o

@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <NamedPipe.h>
 #include <SC_he100.h>
+#include <fletcher.h>
 #include "../../include/of2g.h"
 
 static bool initialized = false;
