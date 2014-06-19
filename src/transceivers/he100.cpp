@@ -19,7 +19,7 @@ bool initialize(){
    fprintf(stderr, "Initializing %s\n", __FILE__);
 
     if (!datapipe.Exist()) datapipe.CreatePipe();
-    datapipe.ensure_open('r');
+    datapipe.Open('r');
    if(0 == (he100_fd = HE100_openPort())){
       fprintf(stderr, "HE100_openPort returned 0 (%s:%d)\n",__FILE__,__LINE__);
       return false;
