@@ -11,7 +11,7 @@ MICROCFLAGS=-mcpu=v8.10.a -mxl-barrel-shift -mxl-multiply-high -mxl-pattern-comp
 # Linker
 LD      = g++
 MICROLD = $(MICROCC)
-LDFLAGS = -O$(OPT_LVL) $(WARNINGS) -lrt
+LDFLAGS = -L/usr/lib/x86_64-linux-gnu/ -O$(OPT_LVL) $(WARNINGS) -lrt 
 
 PROJ    = netman
 # Source files that we will use

@@ -30,7 +30,6 @@ bool initialize(){
    return true;
 }
 
-
 unsigned char*
 hex_decode(unsigned char *in, size_t len,unsigned char *out)
 {
@@ -47,7 +46,6 @@ hex_decode(unsigned char *in, size_t len,unsigned char *out)
     return out;
 }
 
-
 void transceiver_init(){
    initialize();
 }
@@ -60,13 +58,14 @@ void transceiver_init(){
 bool transceiver_read(of2g_frame_t frame){
    char garbage[5];
    of2g_frame_t tmp_frame;
+   unsigned char payload[256];
 
    if(!initialized){
       initialized = initialize();
    }
 
    printf("Reading from transceiver... (%s:%d)\n", __FILE__, __LINE__);
-   HE100_read(he100_fd, 5);
+   HE100_read(he100_fd, 5, payload);
 
    // TODO - check EOF condition also and deal with it
 
@@ -78,6 +77,7 @@ bool transceiver_read(of2g_frame_t frame){
     // read 4 ending garbage bytes + endline
 
     // read garbage bytes first
+    /*
     datapipe.ReadFromPipe((char*)tmp_frame, 14);
 
    // read the first 3 bytes, these are always all there, and contain the
@@ -87,9 +87,10 @@ bool transceiver_read(of2g_frame_t frame){
       printf("Could not get first 3 bytes for length\n");
       return false;
    }
+   */
 
     unsigned char res[3];
-    hex_decode((unsigned char *)OF2G_FRAME_2_BUFFER(tmp_frame),6,res);
+    hex_decode(payload,6,res);
     printf("length byte: %d\n", res[2]);
 
     printf("Read first 3 bytes:\n");
@@ -104,7 +105,9 @@ bool transceiver_read(of2g_frame_t frame){
    size_t bytes_to_read = res[2] + 2;
    bytes_to_read = bytes_to_read * 2;
    printf("bytes to read after length byte: %d!\n", (int)bytes_to_read);
+
    // We read the entire rest of the frame
+   /*
    if(bytes_to_read !=
            datapipe.ReadFromPipe((char *)OF2G_FRAME_2_BUFFER(tmp_frame) + 6, bytes_to_read))
    {
@@ -113,9 +116,11 @@ bool transceiver_read(of2g_frame_t frame){
    }
     // Dump garbage bytes after our frame
     datapipe.ReadFromPipe(garbage, 5);
+    */
+
     // Convert full ASCII frame to HEX
     size_t frame_length = bytes_to_read + 6;
-    hex_decode((unsigned char *)OF2G_FRAME_2_BUFFER(tmp_frame),frame_length+1,(unsigned char*)OF2G_FRAME_2_BUFFER(frame));
+/*    hex_decode((unsigned char *)OF2G_FRAME_2_BUFFER(tmp_frame),frame_length+1,(unsigned char*)OF2G_FRAME_2_BUFFER(frame));
 
     printf("total frame length = %zu\n", of2g_get_frame_length(frame));
     printf("Unconverted frame: \n");
@@ -133,6 +138,7 @@ bool transceiver_read(of2g_frame_t frame){
             printf(" 0x%02X ", c);
     }
     printf("\n");
+    */
     return true;
 
 }
