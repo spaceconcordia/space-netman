@@ -11,17 +11,25 @@ MICROCFLAGS=-mcpu=v8.10.a -mxl-barrel-shift -mxl-multiply-high -mxl-pattern-comp
 # Linker
 LD      = g++
 MICROLD = $(MICROCC)
-LDFLAGS = -L/usr/lib/x86_64-linux-gnu/ -O$(OPT_LVL) $(WARNINGS) -lrt 
+LDFLAGS = -L/usr/lib/x86_64-linux-gnu/ -O$(OPT_LVL) $(WARNINGS) 
 
 PROJ    = netman
 # Source files that we will use
 SRCS    := netman.c of2g.c
 SRCS    := $(addprefix src/, $(SRCS))
 
-LIBPATH 	= ../space-lib/lib/
-INCFLAGS 	= -I../space-lib/include
-LIBS     := Net2Com.a NamedPipe.a libfletcher.a libhe100.a libtimer.a libshakespeare.a
-LIBS     := $(addprefix $(LIBPATH), $(LIBS))
+SPACE_LIB=../space-lib
+SPACE_TIMER_LIB=../space-timer-lib
+SPACE_HE100_LIB=../HE100-lib
+SPACE_COMMANDER_LIB=../space-commander
+
+LIBPATH=-L$(SPACE_LIB)/shakespeare/lib -L$(SPACE_TIMER_LIB)/lib -L$(SPACE_COMMANDER_LIB)/lib -L$(SPACE_HE100_LIB)/C/lib -L$(SPACE_LIB)/checksum/lib
+
+#LIBPATH 	= ../space-lib/lib/
+INCFLAGS 	= -I./include/ -I$(SPACE_LIB)/checksum/inc/ -I$(SPACE_LIB)/shakespeare/inc/ -I$(SPACE_TIMER_LIB)/inc/ -I$(SPACE_LIB)/include/ -I$(SPACE_COMMANDER_LIB)/include/
+#LIBS= $(SPACE_COMMANDER_LIB)/lib/libNet2Com.a $(SPACE_COMMANDER_LIB)/lib/libNamedPipe.a $(SPACE_LIB)/checksum/lib/libfletcher.a $(SPACE_HE100_LIB)/C/lib/libhe100.a $(SPACE_TIMER_LIB)/lib/libtimer.a $(SPACE_LIB)/shakespeare/lib/libshakespeare.a
+#LIBS     := $(addprefix $(LIBPATH), $(LIBS))
+LIBS=-lNet2Com -lNamedPipe -ltimer -lfletcher -lhe100 -lshakespeare -lrt -lstdc++
 
 MICROLIBS     := Net2Com-mbcc.a NamedPipe-mbcc.a libtimer-mbcc.a libfletcher-mbcc.a libhe100-mbcc.a libshakespeare-mbcc.a
 MICROLIBS     := $(addprefix lib/, $(MICROLIBS))
@@ -85,11 +93,11 @@ $(BIN_DIR):
 	@$(MAKE_DEPEND)
 
 src/sat_transceiver.o: src/transceiver.c $(DEP_DIR)
-	$(CC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="sat-out-gnd-in"' \
+	$(CC) $(INCFLAGS) $(CCFLAGS) $< -o $@
+#	-D'TRNSCVR_TX_PIPE="sat-out-gnd-in"' \
 	                  -D'TRNSCVR_RX_PIPE="gnd-out-sat-in"' \
 							-D'USE_PIPE_TRNSCVR' \
 							-D'VALVE_TX_PIPE="sat_valve"' \
-							$(CCFLAGS) $< -o $@
 
 src/gnd_transceiver.o: src/transceiver.c $(DEP_DIR)
 	$(CC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="gnd-out-sat-in"' \
@@ -109,8 +117,8 @@ $(GND_BIN_FILE): $(SRCS:%.c=%.o) src/gnd_transceiver.o src/gnd_main.o $(LIBS) $(
 	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
 
 # Our binary requires all our o files, and is fairly simple to make
-$(SAT_BIN_FILE): $(SRCS:%.c=%.o) src/sat_transceiver.o src/sat_main.o $(LIBS) $(BIN_DIR)
-	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
+$(SAT_BIN_FILE): $(SRCS:%.c=%.o) src/sat_transceiver.o src/sat_main.o $(BIN_DIR)
+	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(INCFLAGS) $(LDFLAGS) $(LIBPATH) $(LIBS) -o $@
 
 
 # Q6 shit down here
