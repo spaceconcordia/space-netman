@@ -22,14 +22,15 @@ SPACE_LIB=../space-lib
 SPACE_TIMER_LIB=../space-timer-lib
 SPACE_HE100_LIB=../HE100-lib
 SPACE_COMMANDER_LIB=../space-commander
+SPACE_UTLS_LIB=../space-lib/utls
 
-LIBPATH=-L$(SPACE_LIB)/shakespeare/lib -L$(SPACE_TIMER_LIB)/lib -L$(SPACE_COMMANDER_LIB)/lib -L$(SPACE_HE100_LIB)/C/lib -L$(SPACE_LIB)/checksum/lib
+LIBPATH=-L$(SPACE_LIB)/shakespeare/lib -L$(SPACE_TIMER_LIB)/lib -L$(SPACE_COMMANDER_LIB)/lib -L$(SPACE_HE100_LIB)/C/lib -L$(SPACE_LIB)/checksum/lib -L$(SPACE_UTLS_LIB)/lib
 
 #LIBPATH 	= ../space-lib/lib/
 INCFLAGS 	= -I./include/ -I$(SPACE_LIB)/checksum/inc/ -I$(SPACE_LIB)/shakespeare/inc/ -I$(SPACE_TIMER_LIB)/inc/ -I$(SPACE_LIB)/include/ -I$(SPACE_COMMANDER_LIB)/include/
 #LIBS= $(SPACE_COMMANDER_LIB)/lib/libNet2Com.a $(SPACE_COMMANDER_LIB)/lib/libNamedPipe.a $(SPACE_LIB)/checksum/lib/libfletcher.a $(SPACE_HE100_LIB)/C/lib/libhe100.a $(SPACE_TIMER_LIB)/lib/libtimer.a $(SPACE_LIB)/shakespeare/lib/libshakespeare.a
 #LIBS     := $(addprefix $(LIBPATH), $(LIBS))
-LIBS=-lNet2Com -lNamedPipe -ltimer -lfletcher -lhe100 -lshakespeare -lrt -lstdc++
+LIBS=-lNet2Com -lNamedPipe -ltimer -lfletcher -lshakespeare -lhe100 -lrt -lstdc++ -lcrypto -lssl -lcs1_utls
 
 MICROLIBS     := Net2Com-mbcc.a NamedPipe-mbcc.a libtimer-mbcc.a libfletcher-mbcc.a libhe100-mbcc.a libshakespeare-mbcc.a
 MICROLIBS     := $(addprefix lib/, $(MICROLIBS))
@@ -44,7 +45,7 @@ SAT_BIN_FILEQ6= $(BIN_DIR)/sat-mbcc
 GND_BIN_FILEQ6= $(BIN_DIR)/gnd-mbcc
 SAT_BIN_FILEBB= $(BIN_DIR)/sat-BB
 GND_BIN_FILEBB= $(BIN_DIR)/gnd-BB
-ALL_TRG = $(SAT_BIN_FILE) $(GND_BIN_FILE)
+ALL_TRG = $(SAT_BIN_FILE) 
 ALL_TRGQ6 = $(SAT_BIN_FILEQ6) $(GND_BIN_FILEQ6)
 ALL_TRGBB = $(SAT_BIN_FILEBB) $(GND_BIN_FILEBB)
 # Generate exact dependencies using a smart method that I found online.
