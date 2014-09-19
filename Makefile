@@ -23,14 +23,15 @@ SPACE_TIMER_LIB=../space-timer-lib
 SPACE_HE100_LIB=../HE100-lib
 SPACE_COMMANDER_LIB=../space-commander
 SPACE_UTLS_LIB=../space-lib/utls
+CPPUTEST_HOME=../CppUTest
 
-LIBPATH=-L$(SPACE_LIB)/shakespeare/lib -L$(SPACE_TIMER_LIB)/lib -L$(SPACE_COMMANDER_LIB)/lib -L$(SPACE_HE100_LIB)/C/lib -L$(SPACE_LIB)/checksum/lib -L$(SPACE_UTLS_LIB)/lib
+LIBPATH=-L$(SPACE_LIB)/shakespeare/lib -L$(SPACE_TIMER_LIB)/lib -L$(SPACE_COMMANDER_LIB)/lib -L$(SPACE_HE100_LIB)/C/lib -L$(SPACE_LIB)/checksum/lib -L$(SPACE_UTLS_LIB)/lib -L$(CPPUTEST_HOME)/lib
 
 #LIBPATH 	= ../space-lib/lib/
 INCFLAGS 	= -I./include/ -I$(SPACE_LIB)/checksum/inc/ -I$(SPACE_LIB)/shakespeare/inc/ -I$(SPACE_TIMER_LIB)/inc/ -I$(SPACE_LIB)/include/ -I$(SPACE_COMMANDER_LIB)/include/
 #LIBS= $(SPACE_COMMANDER_LIB)/lib/libNet2Com.a $(SPACE_COMMANDER_LIB)/lib/libNamedPipe.a $(SPACE_LIB)/checksum/lib/libfletcher.a $(SPACE_HE100_LIB)/C/lib/libhe100.a $(SPACE_TIMER_LIB)/lib/libtimer.a $(SPACE_LIB)/shakespeare/lib/libshakespeare.a
 #LIBS     := $(addprefix $(LIBPATH), $(LIBS))
-LIBS=-lNet2Com -lNamedPipe -ltimer -lfletcher -lshakespeare -lhe100 -lrt -lstdc++ -lcrypto -lssl -lcs1_utls
+LIBS=-lNet2Com -lNamedPipe -ltimer -lfletcher -lshakespeare -lhe100 -lrt -lcrypto -lssl -lcs1_utls -lstdc++ -lCppUTest -lCppUTestExt
 
 MICROLIBS     := Net2Com-mbcc.a NamedPipe-mbcc.a libtimer-mbcc.a libfletcher-mbcc.a libhe100-mbcc.a libshakespeare-mbcc.a
 MICROLIBS     := $(addprefix lib/, $(MICROLIBS))
@@ -48,6 +49,8 @@ GND_BIN_FILEBB= $(BIN_DIR)/gnd-BB
 ALL_TRG = $(SAT_BIN_FILE) 
 ALL_TRGQ6 = $(SAT_BIN_FILEQ6) $(GND_BIN_FILEQ6)
 ALL_TRGBB = $(SAT_BIN_FILEBB) $(GND_BIN_FILEBB)
+
+
 # Generate exact dependencies using a smart method that I found online.
 #
 # The basic idea is that we don't need to know the dependencies until
@@ -82,6 +85,22 @@ $(BIN_DIR):
 # Here is where all the .dep file are #include'd
 -include $(SRCS:%.c=$(DEP_DIR)/%.d)
 
+OBJECTS=Date.o fletcher.o timer.o shakespeare.o SC_he100.o 
+
+Date.o : $(SPACE_UTLS_LIB)/src/Date.cpp
+	    $(CXX) $(CPPFLAGS) -I$(SPACE_UTLS_LIB)/include/ $(CXXFLAGS) -c $(SPACE_UTLS_LIB)/src/Date.cpp
+
+timer.o : $(SPACE_TIMER_LIB)/src/timer.c 
+	    $(CXX) $(CPPFLAGS) -I$(SPACE_TIMER_LIB)/inc/ $(CXXFLAGS) -c $(SPACE_TIMER_LIB)/src/timer.c
+
+fletcher.o : $(SPACE_LIB)/checksum/src/fletcher.c
+	    $(CXX) $(CPPFLAGS) $(INCPATH) $(PCINCPATH) $(CXXFLAGS) -c $(FLETCHER_DIR)/src/fletcher.c
+
+shakespeare.o : $(SPACE_LIB)/shakespeare/src/shakespeare.cpp 
+	    $(CXX) $(CPPFLAGS) -I$(SPACE_LIB)/shakespeare/inc/ $(INCPATH) $(CXXFLAGS) -c $(SPACE_LIB)/shakespeare/src/shakespeare.cpp
+
+SC_he100.o : $(USER_DIR)/src/SC_he100.c
+	    $(CXX) $(CPPFLAGS) $(INCPATH) $(PCINCPATH) $(CXXFLAGS) -c $(USER_DIR)/src/SC_he100.c
 # TODO - integrate the libs properly!!
 # For each c file, we compile it to an o file, and then make a
 # dependency file for it, as explained above
