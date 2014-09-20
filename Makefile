@@ -28,14 +28,12 @@ CPPUTEST_HOME=../CppUTest
 LIBPATH=-L$(SPACE_LIB)/shakespeare/lib -L$(SPACE_TIMER_LIB)/lib -L$(SPACE_COMMANDER_LIB)/lib -L$(SPACE_HE100_LIB)/C/lib -L$(SPACE_LIB)/checksum/lib -L$(SPACE_UTLS_LIB)/lib -L$(CPPUTEST_HOME)/lib
 
 #LIBPATH 	= ../space-lib/lib/
-INCFLAGS 	= -I./include/ -I$(SPACE_LIB)/checksum/inc/ -I$(SPACE_LIB)/shakespeare/inc/ -I$(SPACE_TIMER_LIB)/inc/ -I$(SPACE_LIB)/include/ -I$(SPACE_COMMANDER_LIB)/include/
-#LIBS= $(SPACE_COMMANDER_LIB)/lib/libNet2Com.a $(SPACE_COMMANDER_LIB)/lib/libNamedPipe.a $(SPACE_LIB)/checksum/lib/libfletcher.a $(SPACE_HE100_LIB)/C/lib/libhe100.a $(SPACE_TIMER_LIB)/lib/libtimer.a $(SPACE_LIB)/shakespeare/lib/libshakespeare.a
-#LIBS     := $(addprefix $(LIBPATH), $(LIBS))
-LIBS=-lNet2Com -lNamedPipe -ltimer -lfletcher -lshakespeare -lhe100 -lrt -lcrypto -lssl -lcs1_utls -lstdc++ -lCppUTest -lCppUTestExt
+INCFLAGS 	= -I./include/ -I$(SPACE_LIB)/checksum/inc/ -I../HE100-lib/C/inc/ -I$(SPACE_LIB)/shakespeare/inc/ -I$(SPACE_TIMER_LIB)/inc/ -I$(SPACE_LIB)/include/ -I$(SPACE_COMMANDER_LIB)/include/
+LIBS=-lNet2Com -ltimer -lfletcher -lshakespeare -lhe100 -lrt -lcrypto -lssl -lcs1_utls -lstdc++ -lCppUTest -lCppUTestExt
 
-MICROLIBS     := Net2Com-mbcc.a NamedPipe-mbcc.a libtimer-mbcc.a libfletcher-mbcc.a libhe100-mbcc.a libshakespeare-mbcc.a
+MICROLIBS     := Net2Com-mbcc.a  libtimer-mbcc.a libfletcher-mbcc.a libhe100-mbcc.a libshakespeare-mbcc.a
 MICROLIBS     := $(addprefix lib/, $(MICROLIBS))
-BEAGLELIBS    := Net2Com-BB.a NamedPipe-BB.a libtimer-BB.a libflecher-BB.a libhe100-BB.a libshakespeare-BB.a
+BEAGLELIBS    := Net2Com-BB.a libtimer-BB.a libflecher-BB.a libhe100-BB.a libshakespeare-BB.a
 BEAGLELIBS    := $(addprefix lib/, $(BEAGLELIBS))
 
 BIN_DIR = bin

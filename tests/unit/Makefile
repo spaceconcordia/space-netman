@@ -18,11 +18,13 @@ GTEST_DIR = ../../../gtest-1.7.0
 
 # Where to find user code.
 USER_DIR = ../../../space-netman
+HELIUM_DIR = ../../../HE100-lib/C/
+FLETCHER_DIR = ../../../space-lib/checksum/
 
 # Flags passed to the preprocessor.
 # Set Google Test's header directory as a system directory, such that
 # the compiler doesn't generate warnings in Google Test headers.
-CPPFLAGS += -isystem $(GTEST_DIR)/include -I$(USER_DIR)/lib/include
+CPPFLAGS += -isystem $(GTEST_DIR)/include -I$(HELIUM_DIR)/inc -I$(FLECHER_DIR)/inc  -I$(USER_DIR)/lib/include
 
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g -Wall -Wextra -pthread
