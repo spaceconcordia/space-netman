@@ -18,13 +18,14 @@ GTEST_DIR = ../../../gtest-1.7.0
 
 # Where to find user code.
 USER_DIR = ../../../space-netman
-HELIUM_DIR = ../../../HE100-lib/C/
-FLETCHER_DIR = ../../../space-lib/checksum/
+HELIUM_DIR = ../../../HE100-lib/C
+FLETCHER_DIR = ../../../space-lib/checksum
+SPACE_TIMER_DIR = ../../../space-timer-lib
 
 # Flags passed to the preprocessor.
 # Set Google Test's header directory as a system directory, such that
 # the compiler doesn't generate warnings in Google Test headers.
-CPPFLAGS += -isystem $(GTEST_DIR)/include -I$(HELIUM_DIR)/inc -I$(FLECHER_DIR)/inc  -I$(USER_DIR)/lib/include
+CPPFLAGS += -isystem $(GTEST_DIR)/include -I$(HELIUM_DIR)/inc -I$(FLETCHER_DIR)/inc 
 
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g -Wall -Wextra -pthread
@@ -80,11 +81,11 @@ of2g.o : $(USER_DIR)/src/of2g.c $(USER_DIR)/include/of2g.h
 netman-of2g-test.o : $(USER_DIR)/tests/unit/netman-of2g-test.cpp $(USER_DIR)/include/of2g.h  $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/tests/unit/netman-of2g-test.cpp
 
-netman-of2g-test : of2g.o netman-of2g-test.o gtest_main.a $(USER_DIR)/lib/libhe100.a $(USER_DIR)/lib/libtimer.a
+netman-of2g-test : of2g.o netman-of2g-test.o gtest_main.a $(HELIUM_DIR)/lib/libhe100.a $(SPACE_TIMER_DIR)/lib/libtimer.a $(FLETCHER_DIR)/lib/libfletcher.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ -lrt -lpthread
 
 netman-frame-test.o : $(USER_DIR)/tests/unit/netman-frame-test.cpp $(USER_DIR)/include/netman.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/tests/unit/netman-frame-test.cpp
 
-netman-frame-test : of2g.o netman-frame-test.o netman.o gtest_main.a $(USER_DIR)/lib/libhe100.a $(USER_DIR)/lib/libtimer.a
+netman-frame-test : of2g.o netman-frame-test.o netman.o gtest_main.a $(HELIUM_DIR)/lib/libhe100.a $(SPACE_TIMER_DIR)/lib/libtimer.a $(FLETCHER_DIR)/lib/libfletcher.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ -lrt -lpthread
