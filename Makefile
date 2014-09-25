@@ -27,13 +27,12 @@ CPPUTEST_HOME=../CppUTest
 
 LIBPATH=-L$(SPACE_LIB)/shakespeare/lib -L$(SPACE_TIMER_LIB)/lib -L$(SPACE_COMMANDER_LIB)/lib -L$(SPACE_HE100_LIB)/C/lib -L$(SPACE_LIB)/checksum/lib -L$(SPACE_UTLS_LIB)/lib -L$(CPPUTEST_HOME)/lib
 
-#LIBPATH 	= ../space-lib/lib/
 INCFLAGS 	= -I./include/ -I$(SPACE_LIB)/checksum/inc/ -I../HE100-lib/C/inc/ -I$(SPACE_LIB)/shakespeare/inc/ -I$(SPACE_TIMER_LIB)/inc/ -I$(SPACE_LIB)/include/ -I$(SPACE_COMMANDER_LIB)/include/
-LIBS=-lNet2Com -ltimer -lfletcher -lshakespeare -lhe100 -lrt -lcrypto -lssl -lcs1_utls -lstdc++ -lCppUTest -lCppUTestExt
 
-MICROLIBS     := Net2Com-mbcc.a  libtimer-mbcc.a libfletcher-mbcc.a libhe100-mbcc.a libshakespeare-mbcc.a
-MICROLIBS     := $(addprefix lib/, $(MICROLIBS))
-BEAGLELIBS    := Net2Com-BB.a libtimer-BB.a libflecher-BB.a libhe100-BB.a libshakespeare-BB.a
+LIBS=			-lNet2Com -ltimer -lfletcher -lshakespeare -lhe100 -lrt -lcrypto -lssl -lcs1_utls -lstdc++ -lCppUTest -lCppUTestExt
+MICROLIBS     := timer-mbcc Net2Com-mbcc fletcher-mbcc he100-mbcc shakespeare-mbcc cs1_utlsQ6 rt
+MICROLIBS     := $(addprefix -l, $(MICROLIBS))
+BEAGLELIBS    := libNet2Com-BB.a libtimer-BB.a libflecher-BB.a libhe100-BB.a libshakespeare-BB.a
 BEAGLELIBS    := $(addprefix lib/, $(BEAGLELIBS))
 
 BIN_DIR = bin
@@ -47,7 +46,6 @@ GND_BIN_FILEBB= $(BIN_DIR)/gnd-BB
 ALL_TRG = $(SAT_BIN_FILE) 
 ALL_TRGQ6 = $(SAT_BIN_FILEQ6) $(GND_BIN_FILEQ6)
 ALL_TRGBB = $(SAT_BIN_FILEBB) $(GND_BIN_FILEBB)
-
 
 # Generate exact dependencies using a smart method that I found online.
 #
@@ -163,11 +161,11 @@ src/sat_mainQ6.o : src/sat_main.c src/sat_transceiverQ6.o
 src/sat_transceiverQ6.o: src/transceiver.c
 	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -c -o src/sat_transceiverQ6.o
 
-$(GND_BIN_FILEQ6): src/of2gQ6.o src/netmanQ6.o src/gnd_transceiverQ6.o src/gnd_mainQ6.o $(MICROLIBS) $(BIN_DIR)
-	$(MICROLD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
+$(GND_BIN_FILEQ6): src/of2gQ6.o src/netmanQ6.o src/gnd_transceiverQ6.o src/gnd_mainQ6.o $(BIN_DIR)
+	$(MICROLD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@ $(LIBPATH) $(MICROLIBS)
 
-$(SAT_BIN_FILEQ6): src/of2gQ6.o src/netmanQ6.o src/sat_transceiverQ6.o src/sat_mainQ6.o $(MICROLIBS) $(BIN_DIR)
-	$(MICROLD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
+$(SAT_BIN_FILEQ6): src/of2gQ6.o src/netmanQ6.o src/sat_transceiverQ6.o src/sat_mainQ6.o $(BIN_DIR)
+	$(MICROLD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@ $(LIBPATH) $(MICROLIBS)
 
 src/of2gBB.o : src/of2g.c
 	$(BEAGLECC) $(INCFLAGS) $< -c -o src/of2gBB.o
