@@ -64,8 +64,9 @@ MAKE_DEPENDQ6 = mkdir -p $(DEP_DIR)/$(dir $*); $(CPP) -MM $(CCFLAGS) $< -o $(DEP
 
 # Make our dep_dir and our hex file
 all: $(ALL_TRG)
-Q6: $(ALL_TRGQ6)
-BB: $(ALL_TRGBB)
+buildBin: $(ALL_TRG)
+buildQ6: $(ALL_TRGQ6)
+buildBB: $(ALL_TRGBB)
 # get rid of all the shit we created
 clean:
 	rm -rf $(DEP_DIR)
