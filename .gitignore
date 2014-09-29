@@ -4,6 +4,8 @@ a.out
 *.exe
 *.x
 *.o
+*.a
 .deps
 lib
 bin
+tests/unit/*test
