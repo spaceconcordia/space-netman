@@ -30,7 +30,7 @@ LIBPATH=-L$(SPACE_LIB)/shakespeare/lib -L$(SPACE_TIMER_LIB)/lib -L$(SPACE_COMMAN
 INCFLAGS 	= -I./include/ -I$(SPACE_LIB)/checksum/inc/ -I../HE100-lib/C/inc/ -I$(SPACE_LIB)/shakespeare/inc/ -I$(SPACE_TIMER_LIB)/inc/ -I$(SPACE_LIB)/include/ -I$(SPACE_COMMANDER_LIB)/include/
 
 LIBS=			-lNet2Com -ltimer -lfletcher -lshakespeare -lhe100 -lrt -lcrypto -lssl -lcs1_utls -lstdc++ -lCppUTest -lCppUTestExt
-MICROLIBS     := timer-mbcc Net2Com-mbcc fletcher-mbcc he100-mbcc shakespeare-mbcc cs1_utlsQ6 rt
+MICROLIBS     := timer-mbcc Net2Com-mbcc he100-mbcc fletcher-mbcc shakespeare-mbcc cs1_utlsQ6 rt
 MICROLIBS     := $(addprefix -l, $(MICROLIBS))
 BEAGLELIBS    := libNet2Com-BB.a libtimer-BB.a libflecher-BB.a libhe100-BB.a libshakespeare-BB.a
 BEAGLELIBS    := $(addprefix lib/, $(BEAGLELIBS))

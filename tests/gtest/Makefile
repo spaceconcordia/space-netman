@@ -12,9 +12,9 @@
 # project, except GTEST_HEADERS, which you can use in your own targets
 # but shouldn't modify.
 
-MICROCFLAGS=-mcpu=v8.10.a -mxl-barrel-shift -mxl-multiply-high -mxl-pattern-compare -mno-xl-soft-mul -mno-xl-soft-div -mxl-float-sqrt -mhard-float -mxl-float-convert -ffixed-r31 --sysroot /usr/local/lib/mbgcc/microblaze-unknown-linux-gnu/sys-root -Wall
-MICROCC=microblazeel-xilinx-linux-gnu-gcc $(MICROFLAGS)
-MICROPP=microblazeel-xilinx-linux-gnu-g++ $(MICROFLAGS)
+MICROFLAGS=-mcpu=v8.10.a -mxl-barrel-shift -mxl-multiply-high -mxl-pattern-compare -mno-xl-soft-mul -mno-xl-soft-div -mxl-float-sqrt -mhard-float -mxl-float-convert -ffixed-r31 --sysroot /usr/local/lib/mbgcc/microblaze-unknown-linux-gnu/sys-root -Wall
+MICROCC=microblazeel-xilinx-linux-gnu-gcc 
+MICROPP=microblazeel-xilinx-linux-gnu-g++ 
 
 # Points to the root of Google Test, relative to where this file is.
 # Remember to tweak this if you move this file.
@@ -80,32 +80,30 @@ gtest_main.a : gtest-all.o gtest_main.o
 
 ###########################
 
-PCLIBS=-lhe100 -lfletcher -ltimer -lrt -lpthread
-Q6LIBS=-lhe100-mbcc -lfletcher-mbcc -ltimer-mbcc -lrt -lpthread
-LIBRARIES=$(PCLIBS)
+LIBRARIES=$(LIBPATHS) -lhe100 -lfletcher -ltimer -lrt -lpthread
+Q6LIBS=$(LIBPATHS) -lhe100-mbcc -lfletcher-mbcc -ltimer-mbcc -lrt -lpthread
 
 netman.o : $(USER_DIR)/src/netman.c $(USER_DIR)/include/netman.h of2g.o
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/src/netman.c $(LIBPATHS) $(LIBRARIES)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/src/netman.c 
 
 of2g.o : $(USER_DIR)/src/of2g.c $(USER_DIR)/include/of2g.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/src/of2g.c $(LIBPATHS) $(LIBRARIES)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/src/of2g.c 
 
 netman-of2g-test.o : $(USER_DIR)/tests/gtest/netman-of2g-test.cpp $(USER_DIR)/include/of2g.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(LOCAL_TEST_DIR)/netman-of2g-test.cpp
 
 netman-of2g-test : of2g.o netman-of2g-test.o gtest_main.a 
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LIBPATHS) $(LIBRARIES) 
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LIBRARIES) 
 
 netman-frame-test.o : $(LOCAL_TEST_DIR)/netman-frame-test.cpp $(USER_DIR)/include/netman.h $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(LOCAL_TEST_DIR)/netman-frame-test.cpp
 
 netman-frame-test : of2g.o netman-frame-test.o netman.o gtest_main.a 
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LIBPATHS) $(LIBARIES)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ $(LIBRARIES)
 
-buildBin : LIBRARIES=$(PCLIBS)
-buildBin : $(TARGETS) ;
+buildBin : netman-frame-test 
 
 buildQ6 : CXX=$(MICROPP) 
 buildQ6 : LIBRARIES=$(Q6LIBS)
-buildQ6 : $(TARGETS) ;
-	
+buildQ6 : netman-frame-test ;
+

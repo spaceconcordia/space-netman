@@ -19,7 +19,8 @@
 #
 #**********************************************************************************************************************
 
-ALLTESTS="./bin/job_runner_test"
+FRAMETEST="./netman-frame-test"
+0F2GTEST="./netman-0f2g-test"
 ARGUMENTS=""
 GROUP=""
 TODEVNULL=1
@@ -129,11 +130,15 @@ if [ $SKIP_TEST -eq 0 ]; then
 
     while [ $counter -lt $MULTIPLE_RUN ]; do
         if [ $TODEVNULL -ne 0 ]; then
-            echo $ALLTESTS $ARGUMENTS 2>/dev/null
-            $ALLTESTS $ARGUMENTS  2>/dev/null
+            echo $FRAMETEST $ARGUMENTS 2>/dev/null
+            $FRAMETEST $ARGUMENTS  2>/dev/null
+            echo $0F2GTEST $ARGUMENTS 2>/dev/null
+            $0F2GTEST $ARGUMENTS  2>/dev/null
         else
-            echo $ALLTESTS $ARGUMENTS 
-            $ALLTESTS $ARGUMENTS  
+            echo $FRAMETEST $ARGUMENTS
+            $FRAMETEST $ARGUMENTS 
+            echo $0F2GTEST $ARGUMENTS 
+            $0F2GTEST $ARGUMENTS 
         fi
 
         if [ $? -ne 0 ]; then
