@@ -9,3 +9,6 @@ a.out
 lib
 bin
 tests/unit/*test
+tests/unit/*.a
+netman-frame-test
+netman-of2g-test
