@@ -43,7 +43,7 @@ SAT_BIN_FILEQ6= $(BIN_DIR)/sat-mbcc
 GND_BIN_FILEQ6= $(BIN_DIR)/gnd-mbcc
 SAT_BIN_FILEBB= $(BIN_DIR)/sat-BB
 GND_BIN_FILEBB= $(BIN_DIR)/gnd-BB
-ALL_TRG = $(SAT_BIN_FILE) 
+ALL_TRG = $(SAT_BIN_FILE) $(GND_BIN_FILE)
 ALL_TRGQ6 = $(SAT_BIN_FILEQ6) $(GND_BIN_FILEQ6)
 ALL_TRGBB = $(SAT_BIN_FILEBB) $(GND_BIN_FILEBB)
 
@@ -130,8 +130,8 @@ src/gnd_transceiver.o: src/transceiver.c $(DEP_DIR)
 #	@$(MAKE_DEPEND)
 
 # Our binary requires all our o files, and is fairly simple to make
-$(GND_BIN_FILE): $(SRCS:%.c=%.o) src/gnd_transceiver.o src/gnd_main.o $(LIBS) $(BIN_DIR)
-	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(LDFLAGS) -o $@
+$(GND_BIN_FILE): $(SRCS:%.c=%.o) src/gnd_transceiver.o src/gnd_main.o $(BIN_DIR)
+	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(INCFLAGS) $(LDFLAGS) $(LIBPATH) $(LIBS) -o $@  
 
 # Our binary requires all our o files, and is fairly simple to make
 $(SAT_BIN_FILE): $(SRCS:%.c=%.o) src/sat_transceiver.o src/sat_main.o $(BIN_DIR)

@@ -105,29 +105,7 @@ if [ $CLEAN -eq 1 ]; then
     make clean || exit 1
 fi
 
-#
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#
-# PURPOSE : run/build the tests
-#
-#-----------------------------------------------------------------------------
-if [ $SKIP_TEST -eq 0 ]; then
-    echo ""
-    echo "=== Build tests ==="
-    make clean && make 
-
-    if [ $? -ne 0 ]; then
-        echo -e "\e[31m Build tests failed\e[0m"
-        exit -1
-    else
-        echo -e "\e[32m Build tests success!\e[0m"
-    fi
-
-    echo ""
-    echo "=== Run tests ==="
-
-    counter=0
-
+runtests() {
     while [ $counter -lt $MULTIPLE_RUN ]; do
         if [ $TODEVNULL -ne 0 ]; then
             echo $FRAMETEST $ARGUMENTS 2>/dev/null
@@ -152,5 +130,31 @@ if [ $SKIP_TEST -eq 0 ]; then
 
         counter=$(($counter+1))
     done
+}
+
+#
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# PURPOSE : run/build the tests
+#
+#-----------------------------------------------------------------------------
+if [ $SKIP_TEST -eq 0 ]; then
+    echo ""
+    echo "=== Build tests ==="
+    make clean && make 
+
+    if [ $? -ne 0 ]; then
+        echo -e "\e[31m Build tests failed\e[0m"
+        exit -1
+    else
+        echo -e "\e[32m Build tests success!\e[0m"
+    fi
+
+    echo ""
+    echo "=== Run tests ==="
+    #runtests
+
+    counter=0
+
 fi
 
