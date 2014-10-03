@@ -10,16 +10,13 @@
 
 static bool initialized = false;
 static int    he100_fd;
-static NamedPipe datapipe("/var/log/he100/data.log");
 
 #define print_error(msg) fprintf(stderr, msg " (%s:%d): %s\n", __FILE__, __LINE__, strerror(errno))
 
 bool initialize(){
 
    fprintf(stderr, "Initializing %s\n", __FILE__);
-
-    if (!datapipe.Exist()) datapipe.CreatePipe();
-    datapipe.Open('r');
+   
    if(0 == (he100_fd = HE100_openPort())){
       fprintf(stderr, "HE100_openPort returned 0 (%s:%d)\n",__FILE__,__LINE__);
       return false;
@@ -69,7 +66,7 @@ bool transceiver_read(of2g_frame_t frame){
 
    // TODO - check EOF condition also and deal with it
 
-    // Read 14 garbage
+    // Read 14 garbage bytes
     // discard
     // read 3
     // check length
@@ -90,7 +87,7 @@ bool transceiver_read(of2g_frame_t frame){
    */
 
     unsigned char res[3];
-    hex_decode(payload,6,res);
+    hex_decode(payload+14,6,res); // +14 considers the garbage
     printf("length byte: %d\n", res[2]);
 
     printf("Read first 3 bytes:\n");
@@ -102,8 +99,11 @@ bool transceiver_read(of2g_frame_t frame){
 
    // Now we get the total length of the frame, so we know how many more
    // bytes to read.
-   size_t bytes_to_read = res[2] + 2;
-   bytes_to_read = bytes_to_read * 2;
+   size_t bytes_to_read = res[2] + 2; // length byte
+   /*
+    * TODO CLEANUP ASCII CONVERSION
+    */
+   bytes_to_read = bytes_to_read * 2; // because of ascii conversion
    printf("bytes to read after length byte: %d!\n", (int)bytes_to_read);
 
    // We read the entire rest of the frame

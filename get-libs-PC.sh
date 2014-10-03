@@ -18,11 +18,10 @@ cd $NETMAN_DIR
 cd ../HE100-lib/C
 echo "cd: \c"
 pwd
-sh x86-compile-lib-static-cpp.sh
-cp lib/libhe100-cpp.a $NETMAN_DIR/lib
+sh csmake.sh
+cp lib/libhe100.a $NETMAN_DIR/lib
 cp inc/SC_he100.h $NETMAN_DIR/lib/include
 cd $NETMAN_DIR/lib
-mv libhe100-cpp.a libhe100.a
 
 # Timer library
 echo '\n Building timer Library...\n'
@@ -45,8 +44,8 @@ cp include/NamedPipe.h lib/include
 make buildBin
 cp bin/space-commander $NETMAN_DIR/bin
 make staticlibs.tar
-cp staticlibs.tar $NETMAN_DIR/lib
-cd $NETMAN_DIR/lib
+cp staticlibs.tar $NETMAN_DIR
+cd $NETMAN_DIR
 tar -xf staticlibs.tar
 rm staticlibs.tar
 

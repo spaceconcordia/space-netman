@@ -5,6 +5,7 @@ OPT_LVL = 1
 # C Compiler
 CC      = g++
 CCFLAGS = -c -O$(OPT_LVL) $(WARNINGS)
+DEBUGFLAGS= -ggdb -g -gdwarf-2 -g3 
 MICROCC=microblazeel-xilinx-linux-gnu-g++
 BEAGLECC=arm-linux-gnueabi-g++
 MICROCFLAGS=-mcpu=v8.10.a -mxl-barrel-shift -mxl-multiply-high -mxl-pattern-compare -mno-xl-soft-mul -mno-xl-soft-div -mxl-float-sqrt -mhard-float -mxl-float-convert -ffixed-r31 --sysroot /usr/local/lib/mbgcc/microblaze-unknown-linux-gnu/sys-root -Wall
@@ -65,6 +66,10 @@ MAKE_DEPENDQ6 = mkdir -p $(DEP_DIR)/$(dir $*); $(CPP) -MM $(CCFLAGS) $< -o $(DEP
 # Make our dep_dir and our hex file
 all: $(ALL_TRG)
 buildBin: $(ALL_TRG)
+
+#PIPES=_piped
+#buildBinPiped: buildBin ;
+
 buildQ6: $(ALL_TRGQ6)
 buildBB: $(ALL_TRGBB)
 # get rid of all the shit we created
@@ -102,17 +107,19 @@ SC_he100.o : $(USER_DIR)/src/SC_he100.c
 # For each c file, we compile it to an o file, and then make a
 # dependency file for it, as explained above
 %.o: %.cpp $(DEP_DIR)
-	$(CC) $(INCFLAGS) $(CCFLAGS) $< -o $@
+	$(CC) $(INCFLAGS) $(CCFLAGS) $(DEBUGFLAGS) $< -o $@
 	@$(MAKE_DEPEND)
 
 %.o: %.c $(DEP_DIR)
-	$(CC) $(INCFLAGS) $(CCFLAGS) $< -o $@
+	$(CC) $(INCFLAGS) $(CCFLAGS) $(DEBUGFLAGS) $< -o $@
 	@$(MAKE_DEPEND)
 
 src/sat_transceiver.o: src/transceiver.c $(DEP_DIR)
-	$(CC) $(INCFLAGS) $(CCFLAGS) $< -o $@
-#	-D'TRNSCVR_TX_PIPE="sat-out-gnd-in"' \
-	                  -D'TRNSCVR_RX_PIPE="gnd-out-sat-in"' \
+	$(CC) $(INCFLAGS) $(CCFLAGS) $(DEBUGFLAGS) $< -o $@
+		
+src/sat_transceiver_piped.o: src/transceiver.c $(DEP_DIR)
+	$(CC) $(INCFLAGS) $(CCFLAGS) $(DEBUGFLAGS) $< -o $@ -D'TRNSCVR_TX_PIPE="sat-out-gnd-in"' \
+		                    -D'TRNSCVR_RX_PIPE="gnd-out-sat-in"' \
 							-D'USE_PIPE_TRNSCVR' \
 							-D'VALVE_TX_PIPE="sat_valve"' \
 
@@ -121,7 +128,7 @@ src/gnd_transceiver.o: src/transceiver.c $(DEP_DIR)
 	                  -D'TRNSCVR_RX_PIPE="sat-out-gnd-in"' \
 							-D'USE_PIPE_TRNSCVR' \
 							-D'VALVE_TX_PIPE="gnd_valve"' \
-							$(CCFLAGS) $< -o $@
+							$(CCFLAGS) $(DEBUGFLAGS) $< -o $@
 
 # For each c file, we compile it to an o file, and then make a
 # dependency file for it, as explained above
@@ -131,11 +138,11 @@ src/gnd_transceiver.o: src/transceiver.c $(DEP_DIR)
 
 # Our binary requires all our o files, and is fairly simple to make
 $(GND_BIN_FILE): $(SRCS:%.c=%.o) src/gnd_transceiver.o src/gnd_main.o $(BIN_DIR)
-	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(INCFLAGS) $(LDFLAGS) $(LIBPATH) $(LIBS) -o $@  
+	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(INCFLAGS) $(LDFLAGS) $(LIBPATH) $(LIBS) $(DEBUGFLAGS) -o $@  
 
 # Our binary requires all our o files, and is fairly simple to make
-$(SAT_BIN_FILE): $(SRCS:%.c=%.o) src/sat_transceiver.o src/sat_main.o $(BIN_DIR)
-	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(INCFLAGS) $(LDFLAGS) $(LIBPATH) $(LIBS) -o $@
+$(SAT_BIN_FILE): $(SRCS:%.c=%.o) src/sat_transceiver$(PIPES).o src/sat_main.o $(BIN_DIR)
+	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(INCFLAGS) $(LDFLAGS) $(LIBPATH) $(LIBS) $(DEBUGFLAGS) -o $@
 
 
 # Q6 shit down here
