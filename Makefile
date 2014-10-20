@@ -38,13 +38,14 @@ BEAGLELIBS    := $(addprefix lib/, $(BEAGLELIBS))
 
 BIN_DIR = bin
 SAT_BIN_FILE= $(BIN_DIR)/sat
+MOCK_SAT_BIN_FILE= $(BIN_DIR)/mock_sat
 GND_BIN_FILE= $(BIN_DIR)/gnd
 VALVE_BIN_FILE = $(BIN_DIR)/valve
 SAT_BIN_FILEQ6= $(BIN_DIR)/sat-mbcc
 GND_BIN_FILEQ6= $(BIN_DIR)/gnd-mbcc
 SAT_BIN_FILEBB= $(BIN_DIR)/sat-BB
 GND_BIN_FILEBB= $(BIN_DIR)/gnd-BB
-ALL_TRG = $(SAT_BIN_FILE) $(GND_BIN_FILE)
+ALL_TRG = $(SAT_BIN_FILE) $(MOCK_SAT_BIN_FILE) $(GND_BIN_FILE)
 ALL_TRGQ6 = $(SAT_BIN_FILEQ6) $(GND_BIN_FILEQ6)
 ALL_TRGBB = $(SAT_BIN_FILEBB) $(GND_BIN_FILEBB)
 
@@ -66,9 +67,6 @@ MAKE_DEPENDQ6 = mkdir -p $(DEP_DIR)/$(dir $*); $(CPP) -MM $(CCFLAGS) $< -o $(DEP
 # Make our dep_dir and our hex file
 all: $(ALL_TRG)
 buildBin: $(ALL_TRG)
-
-#PIPES=_piped
-#buildBinPiped: buildBin ;
 
 buildQ6: $(ALL_TRGQ6)
 buildBB: $(ALL_TRGBB)
@@ -140,10 +138,11 @@ src/gnd_transceiver.o: src/transceiver.c $(DEP_DIR)
 $(GND_BIN_FILE): $(SRCS:%.c=%.o) src/gnd_transceiver.o src/gnd_main.o $(BIN_DIR)
 	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(INCFLAGS) $(LDFLAGS) $(LIBPATH) $(LIBS) $(DEBUGFLAGS) -o $@  
 
-# Our binary requires all our o files, and is fairly simple to make
-$(SAT_BIN_FILE): $(SRCS:%.c=%.o) src/sat_transceiver$(PIPES).o src/sat_main.o $(BIN_DIR)
+$(SAT_BIN_FILE): $(SRCS:%.c=%.o) src/sat_transceiver.o src/sat_main.o $(BIN_DIR)
 	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(INCFLAGS) $(LDFLAGS) $(LIBPATH) $(LIBS) $(DEBUGFLAGS) -o $@
 
+$(MOCK_SAT_BIN_FILE): $(SRCS:%.c=%.o) src/sat_transceiver_piped.o src/sat_main.o $(BIN_DIR)
+	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(INCFLAGS) $(LDFLAGS) $(LIBPATH) $(LIBS) $(DEBUGFLAGS) -o $@
 
 # Q6 shit down here
 
