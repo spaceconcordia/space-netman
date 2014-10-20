@@ -6,9 +6,12 @@
 #include <Net2Com.h>
 #include <NamedPipe.h>
 
+#include <shakespeare.h>
 #include "../include/netman.h"
 #include "../include/transceiver.h"
 
+#define PROCESS "GROUND_NETMAN"
+#define LOG_ENTRY_SIZE 100
 #define MAX_QUEUE_SIZE 100
 
 void loop_until_session_closed(netman_t *);
@@ -19,14 +22,14 @@ of2g_frame_t command_queue[MAX_QUEUE_SIZE];
 
 int main()
 {
-
+   Shakespeare::log(Shakespeare::NOTICE,PROCESS,"Starting ground netman");
    if(!gnd_input.Exist()) gnd_input.CreatePipe();
 
    netman_t netman;
    netman_init(&netman);
 
    while(1){
-
+      Shakespeare::log(Shakespeare::NOTICE,PROCESS,"Starting loop_until_session_closed");
       loop_until_session_closed(&netman);
    }
 
@@ -39,6 +42,7 @@ void loop_until_session_closed(netman_t * netman){
    const size_t BUFFLEN = 256;
    char buffer[BUFFLEN]; // TODO - exact max size
    size_t n_bytes;
+   char output[LOG_ENTRY_SIZE]={0}; // output buffer to be reused for shakespeare logging
 
    of2g_frame_t frame;
 
@@ -59,9 +63,9 @@ void loop_until_session_closed(netman_t * netman){
          // ...and we've been waiting for a while...
          if( timer_complete(&resend_timer) ){
             // ...then we're impatient and we resend our data.
-            printf("About to re-TX data over transceiver!!\n");
+            Shakespeare::log(Shakespeare::NOTICE,PROCESS,"About to re-TX data over transceiver!!");
             transceiver_write(netman->current_tx_data);
-            printf("Done re-TX data over transceiver!!\n");
+            Shakespeare::log(Shakespeare::NOTICE,PROCESS,"Done re-TX data over transceiver!!");
             timer_start(&resend_timer, RESEND_TIMEOUT, 0);
          }
       }else{
@@ -76,19 +80,23 @@ void loop_until_session_closed(netman_t * netman){
          if(0 < n_bytes){
             // ... then we send it!
             netman_new_tx_bytes(netman, (unsigned char *)buffer, n_bytes);
-            printf("About to TX data over transceiver!!\n");
+            Shakespeare::log(Shakespeare::NOTICE,PROCESS,"About to TX data over transceiver!!");
             transceiver_write(netman->current_tx_data);
-            printf("Done TX data over transceiver!!\n");
+            Shakespeare::log(Shakespeare::NOTICE,PROCESS,"Done TX data over transceiver!!");
             // We also restart our timer so that we know how long
             // we've been waiting.
-            printf("Starting resend timer at line %d\n", __LINE__);
+            memset(output,0,LOG_ENTRY_SIZE);
+            snprintf(output,40,"Starting resend timer at line %d", __LINE__);
+            Shakespeare::log(Shakespeare::NOTICE,PROCESS,output);
             timer_start(&resend_timer, RESEND_TIMEOUT, 0);
          }
       }
 
       // If there is new data incoming...
       if(transceiver_read(frame)){
-         printf("New data (%s:%d)\n", __FILE__, __LINE__);
+         memset(output,0,LOG_ENTRY_SIZE);
+         snprintf(output,LOG_ENTRY_SIZE,"New data (%s:%d)", __FILE__, __LINE__);
+         Shakespeare::log(Shakespeare::NOTICE,PROCESS,output);
          // ... we process it.
          netman_rx_frame(netman, frame);
 
@@ -96,34 +104,44 @@ void loop_until_session_closed(netman_t * netman){
          // action.
          switch(netman->rx_state){
             case NEW_ACK:
-               printf("  NEW_ACK with ackid = %02X, restarting window (%s:%d)\n", of2g_get_ackid(frame), __FILE__, __LINE__);
+               memset(output,0,LOG_ENTRY_SIZE);
+               snprintf(output,LOG_ENTRY_SIZE,"  NEW_ACK with ackid = %02X, restarting window (%s:%d)", of2g_get_ackid(frame), __FILE__, __LINE__);
+               Shakespeare::log(Shakespeare::NOTICE,PROCESS,output);
                // We don't need to do anything other than keep
                // the window open.
                timer_start(&window_timer, WINDOW_TIMEOUT, 0);
                break;
             case NEW_DATA:
-               printf("  NEW_DATA with fid = %02X, sending ACK (%s:%d)\n", of2g_get_fid(frame), __FILE__, __LINE__);
+               memset(output,0,LOG_ENTRY_SIZE);
+               snprintf(output,LOG_ENTRY_SIZE,"  NEW_DATA with fid = %02X, sending ACK (%s:%d)\n", of2g_get_fid(frame), __FILE__, __LINE__);
+               Shakespeare::log(Shakespeare::NOTICE,PROCESS,output);
                // We need to acknowledge that we received the data
                // ok, send the data to the commander, and finally
                // we need to make sure the window stays open.
-               printf("    TX'ing ACK... ");
+               Shakespeare::log(Shakespeare::NOTICE,PROCESS,"    TX'ing ACK... ");
                transceiver_write(netman->current_tx_ack);
-               printf("    done\n");
+               Shakespeare::log(Shakespeare::NOTICE,PROCESS,"    done\n");
                n_bytes = of2g_get_data_content(netman->current_rx_data, (unsigned char *)buffer);
-               printf(" Data received from satellite with num of bytes %zu: ", n_bytes);
+               memset(output,0,LOG_ENTRY_SIZE);
+               snprintf(output,LOG_ENTRY_SIZE," Data received from satellite with num of bytes %zu: ", n_bytes);
+               Shakespeare::log(Shakespeare::NOTICE,PROCESS,output);
                for(uint8_t i = 0; i < n_bytes; ++i){
                   uint8_t c = buffer[i];
                   if(c >= ' ' && c <= '~'){
                      putchar(c);
                   }else{
-                     printf(" 0x%02X ", c);
+                     memset(output,0,LOG_ENTRY_SIZE);
+                     snprintf(output,LOG_ENTRY_SIZE," 0x%02X ",c); 
+                     Shakespeare::log(Shakespeare::NOTICE,PROCESS,output);
                   }
                }
 
                timer_start(&window_timer, WINDOW_TIMEOUT, 0);
                break;
             case DUP_DATA:
-               printf("  DUP_DATA, resending ACK (%s:%d)\n", __FILE__, __LINE__);
+               memset(output,0,LOG_ENTRY_SIZE);
+               snprintf(output,LOG_ENTRY_SIZE,"  DUP_DATA, resending ACK (%s:%d)\n", __FILE__, __LINE__);
+               Shakespeare::log(Shakespeare::NOTICE,PROCESS,output);
                // Duplicate DATA? They must not have got our ACK, lets
                // send it again.
                transceiver_write(netman->current_tx_ack);
@@ -132,7 +150,9 @@ void loop_until_session_closed(netman_t * netman){
             case BAD_FID:
             case BAD_CSUM:
             default:
-               printf("  SOME KIND OF GARBAGE, ignore it (%s:%d)\n", __FILE__, __LINE__);
+               memset(output,0,LOG_ENTRY_SIZE);
+               snprintf(output,LOG_ENTRY_SIZE,"  SOME KIND OF GARBAGE, ignore it (%s:%d)\n", __FILE__, __LINE__);
+               Shakespeare::log(Shakespeare::NOTICE,PROCESS,output);
                assert(0);
                // Some kind of garbage, who cares, just ignore it.
                break;
