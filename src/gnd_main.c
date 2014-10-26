@@ -13,10 +13,11 @@
 #define PROCESS "GROUND_NETMAN"
 #define LOG_ENTRY_SIZE 100
 #define MAX_QUEUE_SIZE 100
+#define GROUND_INPUT_PIPE "/home/pipes/gnd-input"
 
 void loop_until_session_closed(netman_t *);
 
-static NamedPipe gnd_input("gnd-input");
+static NamedPipe gnd_input(GROUND_INPUT_PIPE);
 
 of2g_frame_t command_queue[MAX_QUEUE_SIZE];
 

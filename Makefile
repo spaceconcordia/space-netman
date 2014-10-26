@@ -36,6 +36,7 @@ MICROLIBS     := $(addprefix -l, $(MICROLIBS))
 BEAGLELIBS    := libNet2Com-BB.a libtimer-BB.a libflecher-BB.a libhe100-BB.a libshakespeare-BB.a
 BEAGLELIBS    := $(addprefix lib/, $(BEAGLELIBS))
 
+PIPE_DIR = /home/pipes
 BIN_DIR = bin
 SAT_BIN_FILE= $(BIN_DIR)/sat
 MOCK_SAT_BIN_FILE= $(BIN_DIR)/mock_sat
@@ -116,16 +117,16 @@ src/sat_transceiver.o: src/transceiver.c $(DEP_DIR)
 	$(CC) $(INCFLAGS) $(CCFLAGS) $(DEBUGFLAGS) $< -o $@
 		
 src/sat_transceiver_piped.o: src/transceiver.c $(DEP_DIR)
-	$(CC) $(INCFLAGS) $(CCFLAGS) $(DEBUGFLAGS) $< -o $@ -D'TRNSCVR_TX_PIPE="sat-out-gnd-in"' \
-		                    -D'TRNSCVR_RX_PIPE="gnd-out-sat-in"' \
+	$(CC) $(INCFLAGS) $(CCFLAGS) $(DEBUGFLAGS) $< -o $@ -D'TRNSCVR_TX_PIPE="$(PIPE_DIR)/sat-out-gnd-in"' \
+		                    -D'TRNSCVR_RX_PIPE="$(PIPE_DIR)/gnd-out-sat-in"' \
 							-D'USE_PIPE_TRNSCVR' \
-							-D'VALVE_TX_PIPE="sat_valve"' \
+							-D'VALVE_TX_PIPE="$(PIPE_DIR)sat_valve"' \
 
 src/gnd_transceiver.o: src/transceiver.c $(DEP_DIR)
-	$(CC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="gnd-out-sat-in"' \
-	                  -D'TRNSCVR_RX_PIPE="sat-out-gnd-in"' \
+	$(CC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="$(PIPE_DIR)/gnd-out-sat-in"' \
+	                  -D'TRNSCVR_RX_PIPE="$(PIPE_DIR)/sat-out-gnd-in"' \
 							-D'USE_PIPE_TRNSCVR' \
-							-D'VALVE_TX_PIPE="gnd_valve"' \
+							-D'VALVE_TX_PIPE="$(PIPE_DIR)gnd_valve"' \
 							$(CCFLAGS) $(DEBUGFLAGS) $< -o $@
 
 # For each c file, we compile it to an o file, and then make a
@@ -153,10 +154,10 @@ src/netmanQ6.o : src/netman.c
 	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -c -o src/netmanQ6.o
 
 src/gnd_transceiverQ6.o : src/transceiver.c
-	$(MICROCC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="gnd-out-sat-in"' \
-	                  -D'TRNSCVR_RX_PIPE="sat-out-gnd-in"' \
+	$(MICROCC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="$(PIPE_DIR)/gnd-out-sat-in"' \
+	                  -D'TRNSCVR_RX_PIPE="$(PIPE_DIR)/sat-out-gnd-in"' \
 							-D'USE_PIPE_TRNSCVR' \
-							-D'VALVE_TX_PIPE="gnd_valve"' \
+							-D'VALVE_TX_PIPE="$(PIPE_DIR)/gnd_valve"' \
 $(MICROCCFLAGS) $< -c -o src/gnd_transceiverQ6.o
 
 src/gnd_mainQ6.o : src/gnd_main.c src/gnd_transceiverQ6.o
@@ -181,7 +182,7 @@ src/netmanBB.o : src/netman.c
 	$(BEAGLECC) $(INCFLAGS) $< -c -o src/netmanBB.o
 
 src/gnd_transceiverBB.o : src/transceiver.c
-	$(BEAGLECC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="gnd-out-sat-in"' \
+	$(BEAGLECC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="$(PIPE_DIR)/gnd-out-sat-in"' \
 	                  -D'TRNSCVR_RX_PIPE="sat-out-gnd-in"' \
 							-D'USE_PIPE_TRNSCVR' \
 							-D'VALVE_TX_PIPE="gnd_valve"' \
