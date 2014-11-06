@@ -20,7 +20,7 @@
 #**********************************************************************************************************************
 
 FRAMETEST="./netman-frame-test"
-0F2GTEST="./netman-0f2g-test"
+OF2GTEST="./netman-of2g-test"
 ARGUMENTS=""
 GROUP=""
 TODEVNULL=1
@@ -106,17 +106,16 @@ if [ $CLEAN -eq 1 ]; then
 fi
 
 runtests() {
-    while [ $counter -lt $MULTIPLE_RUN ]; do
         if [ $TODEVNULL -ne 0 ]; then
             echo $FRAMETEST $ARGUMENTS 2>/dev/null
             $FRAMETEST $ARGUMENTS  2>/dev/null
-            echo $0F2GTEST $ARGUMENTS 2>/dev/null
-            $0F2GTEST $ARGUMENTS  2>/dev/null
+            echo $OF2GTEST $ARGUMENTS 2>/dev/null
+            $OF2GTEST $ARGUMENTS  2>/dev/null
         else
             echo $FRAMETEST $ARGUMENTS
             $FRAMETEST $ARGUMENTS 
-            echo $0F2GTEST $ARGUMENTS 
-            $0F2GTEST $ARGUMENTS 
+            echo $OF2GTEST $ARGUMENTS 
+            $OF2GTEST $ARGUMENTS 
         fi
 
         if [ $? -ne 0 ]; then
@@ -127,9 +126,6 @@ runtests() {
         fi
 
         sleep 1
-
-        counter=$(($counter+1))
-    done
 }
 
 #
@@ -152,9 +148,7 @@ if [ $SKIP_TEST -eq 0 ]; then
 
     echo ""
     echo "=== Run tests ==="
-    #runtests
-
-    counter=0
+    runtests
 
 fi
 
