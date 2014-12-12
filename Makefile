@@ -9,6 +9,7 @@ DEBUGFLAGS= -ggdb -g -gdwarf-2 -g3
 MICROCC=microblazeel-xilinx-linux-gnu-g++
 BEAGLECC=arm-linux-gnueabi-g++
 MICROCFLAGS=-mcpu=v8.10.a -mxl-barrel-shift -mxl-multiply-high -mxl-pattern-compare -mno-xl-soft-mul -mno-xl-soft-div -mxl-float-sqrt -mhard-float -mxl-float-convert -ffixed-r31 --sysroot /usr/local/lib/mbgcc/microblaze-unknown-linux-gnu/sys-root -Wall
+DEBUGOUT = -DCS1_DEBUG 
 # Linker
 LD      = g++
 MICROLD = $(MICROCC)
@@ -106,17 +107,18 @@ SC_he100.o : $(USER_DIR)/src/SC_he100.c
 # For each c file, we compile it to an o file, and then make a
 # dependency file for it, as explained above
 %.o: %.cpp $(DEP_DIR)
-	$(CC) $(INCFLAGS) $(CCFLAGS) $(DEBUGFLAGS) $< -o $@
+	$(CC) $(INCFLAGS) $(CCFLAGS) $(DEBUGFLAGS) $< -o $@ $(DEBUGOUT)
 	@$(MAKE_DEPEND)
 
 %.o: %.c $(DEP_DIR)
-	$(CC) $(INCFLAGS) $(CCFLAGS) $(DEBUGFLAGS) $< -o $@
+	$(CC) $(INCFLAGS) $(CCFLAGS) $(DEBUGFLAGS) $< -o $@ $(DEBUGOUT)
 	@$(MAKE_DEPEND)
 
 src/sat_transceiver.o: src/transceiver.c $(DEP_DIR)
 	$(CC) $(INCFLAGS) $(CCFLAGS) $(DEBUGFLAGS) $< -o $@
 		
 src/sat_transceiver_piped.o: src/transceiver.c $(DEP_DIR)
+<<<<<<< HEAD
 	$(CC) $(INCFLAGS) $(CCFLAGS) $(DEBUGFLAGS) $< -o $@ -D'TRNSCVR_TX_PIPE="$(PIPE_DIR)/sat-out-gnd-in"' \
 		                    -D'TRNSCVR_RX_PIPE="$(PIPE_DIR)/gnd-out-sat-in"' \
 							-D'USE_PIPE_TRNSCVR' \
@@ -127,6 +129,18 @@ src/gnd_transceiver.o: src/transceiver.c $(DEP_DIR)
 	                  -D'TRNSCVR_RX_PIPE="$(PIPE_DIR)/sat-out-gnd-in"' \
 							-D'USE_PIPE_TRNSCVR' \
 							-D'VALVE_TX_PIPE="$(PIPE_DIR)gnd_valve"' \
+=======
+	$(CC) $(INCFLAGS) $(CCFLAGS) $(DEBUGFLAGS) $< -o $@ -D'TRNSCVR_TX_PIPE="/home/pipes/sat-out-gnd-in"' \
+		                    -D'TRNSCVR_RX_PIPE="/home/pipes/gnd-out-sat-in"' \
+							-D'USE_PIPE_TRNSCVR' \
+							-D'VALVE_TX_PIPE="/home/pipes/sat_valve"' \
+
+src/gnd_transceiver.o: src/transceiver.c $(DEP_DIR)
+	$(CC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="/home/pipes/gnd-out-sat-in"' \
+	                  -D'TRNSCVR_RX_PIPE="/home/pipes/sat-out-gnd-in"' \
+							-D'USE_PIPE_TRNSCVR' \
+							-D'VALVE_TX_PIPE="/home/pipes/gnd_valve"' \
+>>>>>>> 7e970b94b5ddd8940a7ad8a53e4466f31dd30327
 							$(CCFLAGS) $(DEBUGFLAGS) $< -o $@
 
 # For each c file, we compile it to an o file, and then make a
@@ -137,7 +151,7 @@ src/gnd_transceiver.o: src/transceiver.c $(DEP_DIR)
 
 # Our binary requires all our o files, and is fairly simple to make
 $(GND_BIN_FILE): $(SRCS:%.c=%.o) src/gnd_transceiver.o src/gnd_main.o $(BIN_DIR)
-	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(INCFLAGS) $(LDFLAGS) $(LIBPATH) $(LIBS) $(DEBUGFLAGS) -o $@  
+	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(INCFLAGS) $(LDFLAGS) $(LIBPATH) $(LIBS) $(DEBUGFLAGS) -o $@ 
 
 $(SAT_BIN_FILE): $(SRCS:%.c=%.o) src/sat_transceiver.o src/sat_main.o $(BIN_DIR)
 	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(INCFLAGS) $(LDFLAGS) $(LIBPATH) $(LIBS) $(DEBUGFLAGS) -o $@
@@ -154,10 +168,17 @@ src/netmanQ6.o : src/netman.c
 	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -c -o src/netmanQ6.o
 
 src/gnd_transceiverQ6.o : src/transceiver.c
+<<<<<<< HEAD
 	$(MICROCC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="$(PIPE_DIR)/gnd-out-sat-in"' \
 	                  -D'TRNSCVR_RX_PIPE="$(PIPE_DIR)/sat-out-gnd-in"' \
 							-D'USE_PIPE_TRNSCVR' \
 							-D'VALVE_TX_PIPE="$(PIPE_DIR)/gnd_valve"' \
+=======
+	$(MICROCC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="/home/pipes/gnd-out-sat-in"' \
+	                  -D'TRNSCVR_RX_PIPE="/home/pipes/sat-out-gnd-in"' \
+							-D'USE_PIPE_TRNSCVR' \
+							-D'VALVE_TX_PIPE="/home/pipes/gnd_valve"' \
+>>>>>>> 7e970b94b5ddd8940a7ad8a53e4466f31dd30327
 $(MICROCCFLAGS) $< -c -o src/gnd_transceiverQ6.o
 
 src/gnd_mainQ6.o : src/gnd_main.c src/gnd_transceiverQ6.o
@@ -182,10 +203,15 @@ src/netmanBB.o : src/netman.c
 	$(BEAGLECC) $(INCFLAGS) $< -c -o src/netmanBB.o
 
 src/gnd_transceiverBB.o : src/transceiver.c
+<<<<<<< HEAD
 	$(BEAGLECC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="$(PIPE_DIR)/gnd-out-sat-in"' \
 	                  -D'TRNSCVR_RX_PIPE="sat-out-gnd-in"' \
+=======
+	$(BEAGLECC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="/home/pipes/gnd-out-sat-in"' \
+	                  -D'TRNSCVR_RX_PIPE="/home/pipes/sat-out-gnd-in"' \
+>>>>>>> 7e970b94b5ddd8940a7ad8a53e4466f31dd30327
 							-D'USE_PIPE_TRNSCVR' \
-							-D'VALVE_TX_PIPE="gnd_valve"' \
+							-D'VALVE_TX_PIPE="/home/pipes/gnd_valve"' \
 $(MICROCCFLAGS) $< -c -o src/gnd_transceiverBB.o
 
 src/gnd_mainBB.o : src/gnd_main.c src/gnd_transceiverBB.o

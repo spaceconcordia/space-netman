@@ -17,7 +17,11 @@
 
 void loop_until_session_closed(netman_t *);
 
+<<<<<<< HEAD
 static NamedPipe gnd_input(GROUND_INPUT_PIPE);
+=======
+static NamedPipe gnd_input("/home/pipes/gnd-input");
+>>>>>>> 7e970b94b5ddd8940a7ad8a53e4466f31dd30327
 
 of2g_frame_t command_queue[MAX_QUEUE_SIZE];
 
@@ -37,9 +41,8 @@ int main()
    return 0;
 }
 
-
-void loop_until_session_closed(netman_t * netman){
-
+void loop_until_session_closed(netman_t * netman)
+{
    const size_t BUFFLEN = 256;
    char buffer[BUFFLEN]; // TODO - exact max size
    size_t n_bytes;
@@ -116,33 +119,37 @@ void loop_until_session_closed(netman_t * netman){
                memset(output,0,LOG_ENTRY_SIZE);
                snprintf(output,LOG_ENTRY_SIZE,"  NEW_DATA with fid = %02X, sending ACK (%s:%d)\n", of2g_get_fid(frame), __FILE__, __LINE__);
                Shakespeare::log(Shakespeare::NOTICE,PROCESS,output);
+
                // We need to acknowledge that we received the data
                // ok, send the data to the commander, and finally
                // we need to make sure the window stays open.
+#ifdef CS1_DEBUG
                Shakespeare::log(Shakespeare::NOTICE,PROCESS,"    TX'ing ACK... ");
+#endif
                transceiver_write(netman->current_tx_ack);
+               // TODO log if this didn't work
+#ifdef CS1_DEBUG
                Shakespeare::log(Shakespeare::NOTICE,PROCESS,"    done\n");
+#endif
+
                n_bytes = of2g_get_data_content(netman->current_rx_data, (unsigned char *)buffer);
+#ifdef CS1_DEBUG
                memset(output,0,LOG_ENTRY_SIZE);
                snprintf(output,LOG_ENTRY_SIZE," Data received from satellite with num of bytes %zu: ", n_bytes);
                Shakespeare::log(Shakespeare::NOTICE,PROCESS,output);
-               for(uint8_t i = 0; i < n_bytes; ++i){
-                  uint8_t c = buffer[i];
-                  if(c >= ' ' && c <= '~'){
-                     putchar(c);
-                  }else{
-                     memset(output,0,LOG_ENTRY_SIZE);
-                     snprintf(output,LOG_ENTRY_SIZE," 0x%02X ",c); 
-                     Shakespeare::log(Shakespeare::NOTICE,PROCESS,output);
-                  }
-               }
 
+               memset(output,0,LOG_ENTRY_SIZE);
+               Shakespeare::log(Shakespeare::NOTICE,PROCESS,buffer);
+               //TODO - print the buffer in hex
+#endif
                timer_start(&window_timer, WINDOW_TIMEOUT, 0);
                break;
             case DUP_DATA:
+#ifdef CS1_DEBUG
                memset(output,0,LOG_ENTRY_SIZE);
                snprintf(output,LOG_ENTRY_SIZE,"  DUP_DATA, resending ACK (%s:%d)\n", __FILE__, __LINE__);
                Shakespeare::log(Shakespeare::NOTICE,PROCESS,output);
+#endif
                // Duplicate DATA? They must not have got our ACK, lets
                // send it again.
                transceiver_write(netman->current_tx_ack);
@@ -151,9 +158,11 @@ void loop_until_session_closed(netman_t * netman){
             case BAD_FID:
             case BAD_CSUM:
             default:
+#ifdef CS1_DEBUG
                memset(output,0,LOG_ENTRY_SIZE);
                snprintf(output,LOG_ENTRY_SIZE,"  SOME KIND OF GARBAGE, ignore it (%s:%d)\n", __FILE__, __LINE__);
                Shakespeare::log(Shakespeare::NOTICE,PROCESS,output);
+#endif
                assert(0);
                // Some kind of garbage, who cares, just ignore it.
                break;
@@ -161,5 +170,4 @@ void loop_until_session_closed(netman_t * netman){
       }
    }
 }
-
 
