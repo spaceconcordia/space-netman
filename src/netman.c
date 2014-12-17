@@ -9,17 +9,17 @@ unsigned char g_dataFID = 0x01;
 // netman must be ready to use after this.
 void netman_init(netman_t * netman)
 {
-  /* TODO: check initialization to be done
-     netman->current_rx_ack = 0;
-     netman->current_rx_data = 0;
-     netman->current_rx_fid = 0;
-  //G netman->current_tx_ack = 0;
-  //G netman->current_tx_data = 0;
-  netman->current_tx_fid = 0;
-  // assuming ground station communicates first
-  netman->rx_state = 0;
-   */
-  netman->tx_state = NOT_WAITING_FOR_ACK;
+    netman->current_rx_fid = 0;
+    netman->current_tx_fid = 0;
+    netman->tx_state = NOT_WAITING_FOR_ACK;
+    g_dataFID = 0x01;
+    /* TODO: check initialization to be done
+    netman->current_rx_ack = 0;
+    netman->current_rx_data = 0;
+    netman->current_tx_fid = 0;
+    // assuming ground station communicates first
+    netman->rx_state = 0;
+    */
 }
 
 // Build an of2g DATA frame based on the given buffer of raw data, and
