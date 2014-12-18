@@ -17,11 +17,7 @@
 
 void loop_until_session_closed(netman_t *);
 
-<<<<<<< HEAD
 static NamedPipe gnd_input(GROUND_INPUT_PIPE);
-=======
-static NamedPipe gnd_input("/home/pipes/gnd-input");
->>>>>>> 7e970b94b5ddd8940a7ad8a53e4466f31dd30327
 
 of2g_frame_t command_queue[MAX_QUEUE_SIZE];
 
