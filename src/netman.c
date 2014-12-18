@@ -13,10 +13,13 @@ void netman_init(netman_t * netman)
     netman->current_tx_fid = 0;
     netman->tx_state = NOT_WAITING_FOR_ACK;
     g_dataFID = 0x01;
+    int i;
+    for(i = 0; i < 5; ++i) 
+    {
+        netman->current_rx_ack[i] = 0;
+        netman->current_rx_data[i] = 0;
+    }
     /* TODO: check initialization to be done
-    netman->current_rx_ack = 0;
-    netman->current_rx_data = 0;
-    netman->current_tx_fid = 0;
     // assuming ground station communicates first
     netman->rx_state = 0;
     */

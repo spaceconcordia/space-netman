@@ -76,8 +76,8 @@ TEST_F(Netman_frame_Test, GoodDataFrameToSend) {
 TEST_F(Netman_frame_Test, GoodAckFrameRead) {
 	size_t length = 9;
 	netman_new_tx_bytes(netman, buffer, length);
-
 	ASSERT_EQ(WAITING_FOR_ACK, netman->tx_state);
+
 	netman_rx_frame(netman, expected_ackframe);
 	ASSERT_EQ(NOT_WAITING_FOR_ACK, netman->tx_state);
 	ASSERT_EQ(OF2G_ACK, of2g_get_frametype(expected_ackframe));
@@ -87,6 +87,20 @@ TEST_F(Netman_frame_Test, GoodAckFrameRead) {
 	size_t frame_length = 5;
 	for(i=0;i<frame_length;++i)
 		ASSERT_EQ(expected_ackframe[i], netman->current_rx_ack[i]);
+}
+
+// Test if were still waiting for ack if we get wrong ack
+TEST_F(Netman_frame_Test, WaitForGoodAck) {
+    of2g_frame_t wrong_ackframe = { 0x01, 0x05, 0x0, 0x02, 0x05};
+	size_t length = 9;
+	netman_new_tx_bytes(netman, buffer, length);
+	ASSERT_EQ(WAITING_FOR_ACK, netman->tx_state);
+
+	netman_rx_frame(netman, expected_ackframe);
+	ASSERT_EQ(NOT_WAITING_FOR_ACK, netman->tx_state);
+	ASSERT_EQ(OF2G_ACK, of2g_get_frametype(expected_ackframe));
+	ASSERT_EQ(NEW_ACK, netman->rx_state);
+	ASSERT_EQ(0x01, netman->current_tx_fid);
 }
 
 // verify if were still waiting for a new ack when we don't get the expected ack
