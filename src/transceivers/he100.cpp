@@ -17,8 +17,8 @@ bool initialize(){
 
    fprintf(stderr, "Initializing %s\n", __FILE__);
    
-   if(0 == (he100_fd = HE100_openPort())){
-      fprintf(stderr, "HE100_openPort returned 0 (%s:%d)\n",__FILE__,__LINE__);
+   if(0 == (he100_fd = SC_openPort())){
+      fprintf(stderr, "SC_openPort returned 0 (%s:%d)\n",__FILE__,__LINE__);
       return false;
    }
 
