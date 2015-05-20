@@ -41,7 +41,7 @@ int main()
    netman_init(&netman);
    // TODO Implement Ground Pipes
    // Net2Com net2com(Dnet_w_com_r, Dcom_w_net_r, Inet_w_com_r, Icom_w_net_r);
-   Net2Com net2com(GDnet_w_com_r, GDcom_w_net_r, GInet_w_com_r, GIcom_w_net_r);
+   // Net2Com net2com(GDnet_w_com_r, GDcom_w_net_r, GInet_w_com_r, GIcom_w_net_r);
 
    while(1){
       Shakespeare::log(Shakespeare::NOTICE,PROCESS,"Starting loop_until_session_closed");
