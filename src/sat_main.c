@@ -153,7 +153,7 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com)
             if ( buffer[0] == 0x31 ) 
             {
               memset(log_buffer,0,LOG_BUFFER_SIZE);
-              snprintf(log_buffer,LOG_BUFFER_SIZE,"Read %c from infopipe, ERROR creating command\n", buffer[0]);
+              snprintf(log_buffer,LOG_BUFFER_SIZE,"Read %c from infopipe, ERROR creating command", buffer[0]);
               Shakespeare::log(Shakespeare::ERROR,LOGNAME,log_buffer);
               Shakespeare::log(Shakespeare::ERROR, LOGNAME, "Commander could not create command");
               sprintf(buffer,"Error creating command");
@@ -161,7 +161,7 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com)
             }
             else if ( buffer[0] == 0x32 ) {
               memset(log_buffer,0,LOG_BUFFER_SIZE);
-              snprintf(log_buffer,LOG_BUFFER_SIZE,"Read %d from infopipe, ERROR executing command\n", buffer[0]);
+              snprintf(log_buffer,LOG_BUFFER_SIZE,"Read %d from infopipe, ERROR executing command", buffer[0]);
               Shakespeare::log(Shakespeare::ERROR,LOGNAME,log_buffer);
               Shakespeare::log(Shakespeare::ERROR,LOGNAME, "Commander could not execute command");
               sprintf(buffer,"Error executing command");
@@ -173,7 +173,7 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com)
             Shakespeare::log(Shakespeare::NOTICE,LOGNAME,"Done TX data over transceiver!!");
 
             memset(log_buffer,0,LOG_BUFFER_SIZE);
-            snprintf(log_buffer,LOG_BUFFER_SIZE,"Starting resend timer at line %d\n", __LINE__);
+            snprintf(log_buffer,LOG_BUFFER_SIZE,"Starting resend timer at line %d", __LINE__);
             Shakespeare::log(Shakespeare::NOTICE,LOGNAME,log_buffer);
             timer_start(&resend_timer, RESEND_TIMEOUT, 0);
             // TODO Read and log to tell if data completely sent
@@ -220,7 +220,7 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com)
 
                net2com->WriteToDataPipe(buffer, n_bytes);
                
-               Shakespeare::log(Shakespeare::NOTICE,LOGNAME,"Netman received Comand: ");
+               Shakespeare::log(Shakespeare::NOTICE,LOGNAME,"Netman received Command: ");
                for(uint8_t i = 0; i < n_bytes; ++i){
                    uint8_t c = buffer[i];
                    memset(log_buffer,0,LOG_BUFFER_SIZE);   
@@ -243,7 +243,7 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com)
 
             case DUP_DATA:
                memset(log_buffer,0,LOG_BUFFER_SIZE);   
-               snprintf(log_buffer,LOG_BUFFER_SIZE,"  DUP_DATA, resending ACK (%s:%d)\n", __FILE__, __LINE__);
+               snprintf(log_buffer,LOG_BUFFER_SIZE,"  DUP_DATA, resending ACK (%s:%d)", __FILE__, __LINE__);
                Shakespeare::log(Shakespeare::NOTICE,LOGNAME,log_buffer);
                // Duplicate DATA? They must not have got our ACK, lets
                // send it again.
@@ -257,7 +257,7 @@ void loop_until_session_closed(netman_t * netman, Net2Com * net2com)
 
             default:
                memset(log_buffer,0,LOG_BUFFER_SIZE);   
-               snprintf(log_buffer,LOG_BUFFER_SIZE,"  SOME KIND OF GARBAGE, ignore it (%s:%d)\n", __FILE__, __LINE__);
+               snprintf(log_buffer,LOG_BUFFER_SIZE,"  SOME KIND OF GARBAGE, ignore it (%s:%d)", __FILE__, __LINE__);
                Shakespeare::log(Shakespeare::NOTICE,LOGNAME,log_buffer);
                // Some kind of garbage, who cares, just ignore it.
                break;
