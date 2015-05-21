@@ -1,13 +1,27 @@
 #ifndef _NET2COM_H_
 #define _NET2COM_H_
+//#include "space-commander/NamedPipe.h"
 #include <NamedPipe.h>
 
-typedef enum {
-    Dnet_w_com_r = 0,
-    Dcom_w_net_r = 1,
-    Inet_w_com_r = 2,
-    Icom_w_net_r = 3
-} pipe_num_t;
+#ifdef GROUND_MOCK_SAT
+    typedef enum {
+        Dnet_w_com_r = 0,
+        Dcom_w_net_r = 1,
+        Inet_w_com_r = 2,
+        Icom_w_net_r = 3,
+        GDnet_w_com_r = 4,
+        GDcom_w_net_r = 5,
+        GInet_w_com_r = 6,
+        GIcom_w_net_r = 7
+    } pipe_num_t;
+#else
+    typedef enum {
+        Dnet_w_com_r = 0,
+        Dcom_w_net_r = 1,
+        Inet_w_com_r = 2,
+        Icom_w_net_r = 3
+    } pipe_num_t;
+#endif
 
 class Net2Com{
     private :

@@ -11,22 +11,37 @@
 #include "../include/transceiver.h"
 
 #define PROCESS "GROUND_NETMAN"
+#define GND_PIPES "/home/pipes/ground/"
+
 #define LOG_ENTRY_SIZE 100
 #define MAX_QUEUE_SIZE 100
+#define GROUND_INPUT_PIPE "/home/pipes/gnd-input"
+#define GROUND_OUTPUT_PIPE "/home/pipes/gnd-output"
 
 void loop_until_session_closed(netman_t *);
 
-static NamedPipe gnd_input("/home/pipes/gnd-input");
+static NamedPipe gnd_input(GROUND_INPUT_PIPE);
+static NamedPipe gnd_output(GROUND_OUTPUT_PIPE);
 
 of2g_frame_t command_queue[MAX_QUEUE_SIZE];
 
 int main()
 {
    Shakespeare::log(Shakespeare::NOTICE,PROCESS,"Starting ground netman");
-   if(!gnd_input.Exist()) gnd_input.CreatePipe();
+   if(!gnd_input.Exist()) {
+       gnd_input.CreatePipe();
+       Shakespeare::log(Shakespeare::NOTICE, PROCESS, "Creating gnd_input pipe");
+   }
+   if(!gnd_output.Exist()) {
+       gnd_output.CreatePipe();
+       Shakespeare::log(Shakespeare::NOTICE, PROCESS, "Creating gnd_output pipe");
+   }
 
    netman_t netman;
    netman_init(&netman);
+   // TODO Implement Ground Pipes
+   // Net2Com net2com(Dnet_w_com_r, Dcom_w_net_r, Inet_w_com_r, Icom_w_net_r);
+   // Net2Com net2com(GDnet_w_com_r, GDcom_w_net_r, GInet_w_com_r, GIcom_w_net_r);
 
    while(1){
       Shakespeare::log(Shakespeare::NOTICE,PROCESS,"Starting loop_until_session_closed");
@@ -38,8 +53,8 @@ int main()
 
 void loop_until_session_closed(netman_t * netman)
 {
-   const size_t BUFFLEN = 256;
-   char buffer[BUFFLEN]; // TODO - exact max size
+   const size_t BUFFLEN = CS1_MAX_FRAME_SIZE;
+   char buffer[BUFFLEN];
    size_t n_bytes;
    char output[LOG_ENTRY_SIZE]={0}; // output buffer to be reused for shakespeare logging
 
@@ -55,20 +70,24 @@ void loop_until_session_closed(netman_t * netman)
    timer_start(&window_timer, WINDOW_TIMEOUT, 0);
 
    // We continue in the loop as long as the window is open
-   while( ! timer_complete(&window_timer) ){
-
+   while( ! timer_complete(&window_timer) )
+   {
       // If we're waiting for an ACK...
-      if(netman->tx_state == WAITING_FOR_ACK){
+      if(netman->tx_state == WAITING_FOR_ACK)
+      {
          // ...and we've been waiting for a while...
-         if( timer_complete(&resend_timer) ){
+         if( timer_complete(&resend_timer) )
+         {
             // ...then we're impatient and we resend our data.
             Shakespeare::log(Shakespeare::NOTICE,PROCESS,"About to re-TX data over transceiver!!");
             transceiver_write(netman->current_tx_data);
             Shakespeare::log(Shakespeare::NOTICE,PROCESS,"Done re-TX data over transceiver!!");
             timer_start(&resend_timer, RESEND_TIMEOUT, 0);
          }
-      }else{
-         // Otherwise, logic tells us we most not be waiting for
+      }
+      else
+      {
+         // Otherwise, logic tells us we must not be waiting for
          // an ACK. That means if we have new data to send, we can
          // send it!
          assert(netman->tx_state == NOT_WAITING_FOR_ACK);
@@ -92,7 +111,8 @@ void loop_until_session_closed(netman_t * netman)
       }
 
       // If there is new data incoming...
-      if(transceiver_read(frame)){
+      if(transceiver_read(frame))
+      {
          memset(output,0,LOG_ENTRY_SIZE);
          snprintf(output,LOG_ENTRY_SIZE,"New data (%s:%d)", __FILE__, __LINE__);
          Shakespeare::log(Shakespeare::NOTICE,PROCESS,output);
@@ -101,7 +121,8 @@ void loop_until_session_closed(netman_t * netman)
 
          // Then, depending on what we received, we take some
          // action.
-         switch(netman->rx_state){
+         switch(netman->rx_state)
+         {
             case NEW_ACK:
                memset(output,0,LOG_ENTRY_SIZE);
                snprintf(output,LOG_ENTRY_SIZE,"  NEW_ACK with ackid = %02X, restarting window (%s:%d)", of2g_get_ackid(frame), __FILE__, __LINE__);
@@ -114,7 +135,6 @@ void loop_until_session_closed(netman_t * netman)
                memset(output,0,LOG_ENTRY_SIZE);
                snprintf(output,LOG_ENTRY_SIZE,"  NEW_DATA with fid = %02X, sending ACK (%s:%d)\n", of2g_get_fid(frame), __FILE__, __LINE__);
                Shakespeare::log(Shakespeare::NOTICE,PROCESS,output);
-
                // We need to acknowledge that we received the data
                // ok, send the data to the commander, and finally
                // we need to make sure the window stays open.
@@ -137,6 +157,8 @@ void loop_until_session_closed(netman_t * netman)
                Shakespeare::log(Shakespeare::NOTICE,PROCESS,buffer);
                //TODO - print the buffer in hex
 #endif
+               gnd_output.WriteToPipe(buffer, n_bytes);
+
                timer_start(&window_timer, WINDOW_TIMEOUT, 0);
                break;
             case DUP_DATA:
