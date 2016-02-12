@@ -26,6 +26,7 @@ PROJECT_DIR = ../../..
 USER_DIR = $(PROJECT_DIR)/space-netman
 HELIUM_DIR = $(PROJECT_DIR)/HE100-lib/C
 FLETCHER_DIR = $(PROJECT_DIR)/space-lib/checksum
+UTLS_DIR = $(PROJECT_DIR)/space-lib/utls
 TIMER_DIR = $(PROJECT_DIR)/space-timer-lib
 
 LIBPATHS = -L$(HELIUM_DIR)/lib -L$(FLETCHER_DIR)/lib -L$(TIMER_DIR)/lib
@@ -33,7 +34,7 @@ LIBPATHS = -L$(HELIUM_DIR)/lib -L$(FLETCHER_DIR)/lib -L$(TIMER_DIR)/lib
 # Flags passed to the preprocessor.
 # Set Google Test's header directory as a system directory, such that
 # the compiler doesn't generate warnings in Google Test headers.
-CPPFLAGS += -isystem $(GTEST_DIR)/include -I$(HELIUM_DIR)/inc -I$(FLETCHER_DIR)/inc -I$(USER_DIR)/lib/include
+CPPFLAGS += -isystem $(GTEST_DIR)/include -I$(UTLS_DIR)/include/ -I$(HELIUM_DIR)/inc -I$(FLETCHER_DIR)/inc -I$(USER_DIR)/lib/include
 
 # Flags passed to the C++ compiler.
 CXXFLAGS += -g -Wall -Wextra -pthread
