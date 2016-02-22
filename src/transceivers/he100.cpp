@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <NamedPipe.h>
 #include <SC_he100.h>
+#include <he100.h> // specifies the transceiver const port_address
 #include <fletcher.h>
 #include "../../include/of2g.h"
 
@@ -17,7 +18,7 @@ bool initialize(){
 
    fprintf(stderr, "Initializing %s\n", __FILE__);
    
-   if(0 == (he100_fd = SC_openPort())){
+   if(0 == (he100_fd = SC_openPort(port_address))){
       fprintf(stderr, "SC_openPort returned 0 (%s:%d)\n",__FILE__,__LINE__);
       return false;
    }

@@ -22,14 +22,14 @@ SRCS    := $(addprefix src/, $(SRCS))
 
 SPACE_LIB=../space-lib
 SPACE_TIMER_LIB=../space-timer-lib
-SPACE_HE100_LIB=../HE100-lib
+SPACE_HE100_LIB=../HE100-lib/C
 SPACE_COMMANDER_LIB=../space-commander
 SPACE_UTLS_LIB=../space-lib/utls
 CPPUTEST_HOME=../CppUTest
 
-LIBPATH=-L$(SPACE_LIB)/shakespeare/lib -L$(SPACE_TIMER_LIB)/lib -L$(SPACE_COMMANDER_LIB)/lib -L$(SPACE_HE100_LIB)/C/lib -L$(SPACE_LIB)/checksum/lib -L$(SPACE_UTLS_LIB)/lib -L$(CPPUTEST_HOME)/lib
+LIBPATH=-L$(SPACE_LIB)/shakespeare/lib -L$(SPACE_TIMER_LIB)/lib -L$(SPACE_COMMANDER_LIB)/lib -L$(SPACE_HE100_LIB)/lib -L$(SPACE_LIB)/checksum/lib -L$(SPACE_UTLS_LIB)/lib -L$(CPPUTEST_HOME)/lib
 
-INCFLAGS 	= -I./include/ -I$(SPACE_LIB)/checksum/inc/ -I$(SPACE_UTLS_LIB)/inc/ -I../HE100-lib/C/inc/ -I$(SPACE_LIB)/shakespeare/inc/ -I$(SPACE_TIMER_LIB)/inc/ -I$(SPACE_LIB)/include/ -I$(SPACE_COMMANDER_LIB)/include/space-commander/
+INCFLAGS 	= -I./include/ -I$(SPACE_LIB)/checksum/inc/ -I$(SPACE_HE100_LIB)/inc/ -I../HE100-lib/C/inc/ -I$(SPACE_LIB)/shakespeare/inc/ -I$(SPACE_TIMER_LIB)/inc/ -I$(SPACE_LIB)/include/ -I$(SPACE_COMMANDER_LIB)/include/space-commander/ -I$(SPACE_UTLS_LIB)/include/
 
 LIBS=			-lNet2Com -ltimer -lfletcher -lshakespeare -lhe100 -lrt -lcrypto -lssl -lcs1_utls -lstdc++ -lCppUTest -lCppUTestExt
 MICROLIBS     := timer-mbcc Net2Com-mbcc he100-mbcc fletcher-mbcc shakespeare-mbcc cs1_utlsQ6 rt
@@ -50,6 +50,9 @@ GND_BIN_FILEBB= $(BIN_DIR)/gnd-BB
 ALL_TRG = $(SAT_BIN_FILE) $(MOCK_SAT_BIN_FILE) $(GND_BIN_FILE)
 ALL_TRGQ6 = $(SAT_BIN_FILEQ6) $(GND_BIN_FILEQ6)
 ALL_TRGBB = $(SAT_BIN_FILEBB) $(GND_BIN_FILEBB)
+
+PC_HE100_INC=$(SPACE_HE100_LIB)/inc/PC/he100.h
+Q6_HE100_INC=$(SPACE_HE100_LIB)/inc/Q6/he100.h
 
 # Generate exact dependencies using a smart method that I found online.
 #
@@ -87,10 +90,13 @@ $(BIN_DIR):
 # Here is where all the .dep file are #include'd
 -include $(SRCS:%.c=$(DEP_DIR)/%.d)
 
-OBJECTS=Date.o fletcher.o timer.o shakespeare.o SC_he100.o 
+OBJECTS=Date.o SC_serial.o fletcher.o timer.o shakespeare.o SC_he100.o 
 
 Date.o : $(SPACE_UTLS_LIB)/src/Date.cpp
 	    $(CXX) $(CPPFLAGS) -I$(SPACE_UTLS_LIB)/include/ $(CXXFLAGS) -c $(SPACE_UTLS_LIB)/src/Date.cpp
+
+SC_serial.o : $(SPACE_UTLS_LIB)/src/SC_serial.cpp -I$(SPACE_HE100_LIB)/include/SC_serial.h
+	    $(CXX) $(CPPFLAGS) -I$(SPACE_UTLS_LIB)/include/ $(CXXFLAGS) -c $(SPACE_UTLS_LIB)/src/SC_serial.cpp
 
 timer.o : $(SPACE_TIMER_LIB)/src/timer.c 
 	    $(CXX) $(CPPFLAGS) -I$(SPACE_TIMER_LIB)/inc/ $(CXXFLAGS) -c $(SPACE_TIMER_LIB)/src/timer.c
@@ -103,9 +109,11 @@ shakespeare.o : $(SPACE_LIB)/shakespeare/src/shakespeare.cpp
 
 SC_he100.o : $(USER_DIR)/src/SC_he100.c
 	    $(CXX) $(CPPFLAGS) $(INCPATH) $(PCINCPATH) $(CXXFLAGS) -c $(USER_DIR)/src/SC_he100.c
+		
 # TODO - integrate the libs properly!!
 # For each c file, we compile it to an o file, and then make a
 # dependency file for it, as explained above
+
 %.o: %.cpp $(DEP_DIR)
 	$(CC) $(INCFLAGS) $(CCFLAGS) $(DEBUGFLAGS) $< -o $@ $(DEBUGOUT)
 	@$(MAKE_DEPEND)
@@ -114,16 +122,16 @@ SC_he100.o : $(USER_DIR)/src/SC_he100.c
 	$(CC) $(INCFLAGS) $(CCFLAGS) $(DEBUGFLAGS) $< -o $@ $(DEBUGOUT)
 	@$(MAKE_DEPEND)
 
-src/sat_transceiver.o: src/transceiver.c $(DEP_DIR)
-	$(CC) $(INCFLAGS) $(CCFLAGS) $(DEBUGFLAGS) $< -o $@
+src/sat_transceiver.o: src/transceiver.c $(DEP_DIR) $(PC_HE100_INC)
+	$(CC) $(INCFLAGS) -I$(SPACE_HE100_LIB)/inc/PC/ $(CCFLAGS) $(DEBUGFLAGS) $< -o $@
 		
-src/sat_transceiver_piped.o: src/transceiver.c $(DEP_DIR)
+src/sat_transceiver_piped.o: src/transceiver.c $(DEP_DIR) $(PC_HE100_INC)
 	$(CC) $(INCFLAGS) $(CCFLAGS) $(DEBUGFLAGS) $< -o $@ -D'TRNSCVR_TX_PIPE="$(PIPE_DIR)/sat-out-gnd-in"' \
 		                    -D'TRNSCVR_RX_PIPE="$(PIPE_DIR)/gnd-out-sat-in"' \
 							-D'USE_PIPE_TRNSCVR' \
 							-D'VALVE_TX_PIPE="$(PIPE_DIR)sat_valve"' \
 
-src/gnd_transceiver.o: src/transceiver.c $(DEP_DIR)
+src/gnd_transceiver.o: src/transceiver.c $(DEP_DIR) $(PC_HE100_INC)
 	$(CC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="$(PIPE_DIR)/gnd-out-sat-in"' \
 	                  -D'TRNSCVR_RX_PIPE="$(PIPE_DIR)/sat-out-gnd-in"' \
 							-D'USE_PIPE_TRNSCVR' \
@@ -135,12 +143,11 @@ src/gnd_transceiver.o: src/transceiver.c $(DEP_DIR)
 #%.o: %.c $(DEP_DIR)
 #	$(CC) $(INCFLAGS) $(CCFLAGS) $< -o $@
 #	@$(MAKE_DEPEND)
-
 # Our binary requires all our o files, and is fairly simple to make
 $(GND_BIN_FILE): $(SRCS:%.c=%.o) src/gnd_transceiver.o src/gnd_main.o $(BIN_DIR)
 	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(INCFLAGS) $(LDFLAGS) $(LIBPATH) $(LIBS) $(DEBUGFLAGS) -o $@ 
 
-$(SAT_BIN_FILE): $(SRCS:%.c=%.o) src/sat_transceiver.o src/sat_main.o $(BIN_DIR)
+$(SAT_BIN_FILE): $(SRCS:%.c=%.o) src/sat_transceiver.o src/sat_main.o $(BIN_DIR) $(PC_HE100_INC)
 	$(LD) $(filter %.o, $^) $(filter %.a, $^) $(INCFLAGS) $(LDFLAGS) $(LIBPATH) $(LIBS) $(DEBUGFLAGS) -o $@
 
 $(MOCK_SAT_BIN_FILE): $(SRCS:%.c=%.o) src/sat_transceiver_piped.o src/sat_main.o $(BIN_DIR)
@@ -154,7 +161,7 @@ src/of2gQ6.o : src/of2g.c
 src/netmanQ6.o : src/netman.c
 	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -c -o src/netmanQ6.o
 
-src/gnd_transceiverQ6.o : src/transceiver.c
+src/gnd_transceiverQ6.o : src/transceiver.c  $(PC_HE100_INC)
 	$(MICROCC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="$(PIPE_DIR)/gnd-out-sat-in"' \
 	                  -D'TRNSCVR_RX_PIPE="$(PIPE_DIR)/sat-out-gnd-in"' \
 							-D'USE_PIPE_TRNSCVR' \
@@ -164,10 +171,10 @@ $(MICROCCFLAGS) $< -c -o src/gnd_transceiverQ6.o
 src/gnd_mainQ6.o : src/gnd_main.c src/gnd_transceiverQ6.o
 	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -c -o src/gnd_mainQ6.o
 
-src/sat_mainQ6.o : src/sat_main.c src/sat_transceiverQ6.o
+src/sat_mainQ6.o : src/sat_main.c src/sat_transceiverQ6.o $(Q6_HE100_INC)
 	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -c -o src/sat_mainQ6.o
 
-src/sat_transceiverQ6.o: src/transceiver.c
+src/sat_transceiverQ6.o: src/transceiver.c $(Q6_HE100_INC)
 	$(MICROCC) $(INCFLAGS) $(MICROCCFLAGS) $< -c -o src/sat_transceiverQ6.o
 
 $(GND_BIN_FILEQ6): src/of2gQ6.o src/netmanQ6.o src/gnd_transceiverQ6.o src/gnd_mainQ6.o $(BIN_DIR)
@@ -182,7 +189,7 @@ src/of2gBB.o : src/of2g.c
 src/netmanBB.o : src/netman.c
 	$(BEAGLECC) $(INCFLAGS) $< -c -o src/netmanBB.o
 
-src/gnd_transceiverBB.o : src/transceiver.c
+src/gnd_transceiverBB.o : src/transceiver.c $(Q6_HE100_INC)
 	$(BEAGLECC) $(INCFLAGS) -D'TRNSCVR_TX_PIPE="$(PIPE_DIR)/gnd-out-sat-in"' \
 	                  -D'TRNSCVR_RX_PIPE="sat-out-gnd-in"' \
 							-D'USE_PIPE_TRNSCVR' \
@@ -195,7 +202,7 @@ src/gnd_mainBB.o : src/gnd_main.c src/gnd_transceiverBB.o
 src/sat_mainBB.o : src/sat_main.c src/sat_transceiverBB.o
 	$(BEAGLECC) $(INCFLAGS) $< -c -o src/sat_mainBB.o
 
-src/sat_transceiverBB.o: src/transceiver.c
+src/sat_transceiverBB.o: src/transceiver.c $(PC_HE100_INC)
 	$(BEAGLECC) $(INCFLAGS) $< -c -o src/sat_transceiverBB.o
 
 $(GND_BIN_FILEBB): src/of2gBB.o src/netmanBB.o src/gnd_transceiverBB.o src/gnd_mainBB.o $(BEAGLELIBS) $(BIN_DIR)
